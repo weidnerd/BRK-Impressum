@@ -156,7 +156,7 @@ class BRK_Impressum_Admin {
                                     
                                     <tr>
                                         <th scope="row">
-                                            <label for="responsible_name">Seiten-Verantwortlicher (Name) *</label>
+                                            <label for="responsible_name">Technischer Kontakt (Name) *</label>
                                         </th>
                                         <td>
                                             <input type="text" 
@@ -166,7 +166,7 @@ class BRK_Impressum_Admin {
                                                    value="<?php echo esc_attr($settings['responsible_name']); ?>" 
                                                    required>
                                             <p class="description">
-                                                Name des Redakteurs/Webmasters
+                                                Name des Webmasters
                                             </p>
                                         </td>
                                     </tr>
