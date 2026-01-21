@@ -196,7 +196,15 @@ class BRK_Impressum {
      */
     public function get_facilities_endpoint($request) {
         $loader = BRK_Facilities_Loader::get_instance();
-        $facilities = $loader->get_facilities();
+        
+        // Wenn refresh=true, Cache löschen und neu laden
+        if ($request->get_param('refresh') === 'true' || $request->get_param('refresh') === true) {
+            delete_transient('brk_impressum_facilities');
+            delete_transient('brk_impressum_last_error');
+            $facilities = $loader->refresh_cache();
+        } else {
+            $facilities = $loader->get_facilities();
+        }
         
         if (is_wp_error($facilities)) {
             return new WP_Error('facilities_error', $facilities->get_error_message(), array('status' => 500));
