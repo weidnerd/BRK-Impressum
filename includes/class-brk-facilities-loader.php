@@ -67,43 +67,83 @@ class BRK_Facilities_Loader {
      * @return array|WP_Error Array mit Facilities oder WP_Error bei Fehler
      */
     public function refresh_cache() {
+        // Detailliertes Logging aktivieren
+        $debug_info = array();
+        $debug_info['url'] = BRK_IMPRESSUM_FACILITIES_URL;
+        $debug_info['timestamp'] = current_time('mysql');
+        
         $response = wp_remote_get(BRK_IMPRESSUM_FACILITIES_URL, array(
             'timeout' => 30,
-            'sslverify' => true
+            'sslverify' => true,
+            'headers' => array(
+                'Accept' => 'application/json',
+                'User-Agent' => 'BRK-Impressum-Plugin/1.0.0 WordPress/' . get_bloginfo('version')
+            )
         ));
         
         if (is_wp_error($response)) {
-            return new WP_Error(
-                'facilities_fetch_error',
-                'Fehler beim Abrufen der Facilities-Daten: ' . $response->get_error_message()
-            );
+            $error_message = $response->get_error_message();
+            $debug_info['error_type'] = 'WP_Error';
+            $debug_info['error_message'] = $error_message;
+            $debug_info['error_code'] = $response->get_error_code();
+            
+            error_log('BRK Impressum API Error: ' . print_r($debug_info, true));
+            set_transient('brk_impressum_last_error', $debug_info, 3600);
+            
+            return $this->load_fallback_data($debug_info);
         }
         
         $response_code = wp_remote_retrieve_response_code($response);
+        $response_message = wp_remote_retrieve_response_message($response);
+        
+        $debug_info['http_code'] = $response_code;
+        $debug_info['http_message'] = $response_message;
         
         if ($response_code !== 200) {
-            return new WP_Error(
-                'facilities_http_error',
-                'HTTP-Fehler beim Abrufen der Facilities-Daten: ' . $response_code
-            );
+            $debug_info['error_type'] = 'HTTP_Error';
+            $debug_info['response_headers'] = wp_remote_retrieve_headers($response);
+            $debug_info['response_body_preview'] = substr(wp_remote_retrieve_body($response), 0, 500);
+            
+            error_log('BRK Impressum HTTP Error: ' . print_r($debug_info, true));
+            set_transient('brk_impressum_last_error', $debug_info, 3600);
+            
+            return $this->load_fallback_data($debug_info);
         }
         
         $body = wp_remote_retrieve_body($response);
+        $debug_info['body_length'] = strlen($body);
+        
         $data = json_decode($body, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return new WP_Error(
-                'facilities_json_error',
-                'Fehler beim Parsen der JSON-Daten: ' . json_last_error_msg()
-            );
+            $debug_info['error_type'] = 'JSON_Error';
+            $debug_info['error_message'] = json_last_error_msg();
+            $debug_info['json_error_code'] = json_last_error();
+            $debug_info['body_preview'] = substr($body, 0, 500);
+            
+            error_log('BRK Impressum JSON Error: ' . print_r($debug_info, true));
+            set_transient('brk_impressum_last_error', $debug_info, 3600);
+            
+            return $this->load_fallback_data($debug_info);
         }
         
         if (!is_array($data)) {
-            return new WP_Error(
-                'facilities_format_error',
-                'Ungültiges Datenformat der Facilities'
-            );
+            $debug_info['error_type'] = 'Format_Error';
+            $debug_info['error_message'] = 'Daten sind kein Array';
+            $debug_info['data_type'] = gettype($data);
+            
+            error_log('BRK Impressum Format Error: ' . print_r($debug_info, true));
+            set_transient('brk_impressum_last_error', $debug_info, 3600);
+            
+            return $this->load_fallback_data($debug_info);
         }
+        
+        // Erfolg! Fehler-Transient löschen
+        delete_transient('brk_impressum_last_error');
+        
+        $debug_info['success'] = true;
+        $debug_info['facilities_count'] = count($data);
+        error_log('BRK Impressum Success: Loaded ' . count($data) . ' facilities');
         
         // Daten im Cache speichern
         set_transient(self::CACHE_KEY, $data, self::CACHE_DURATION);
@@ -198,5 +238,155 @@ class BRK_Facilities_Loader {
      */
     public function clear_cache() {
         delete_transient(self::CACHE_KEY);
+    }
+    
+    /**
+     * Lokale Fallback-Daten laden (falls API nicht erreichbar)
+     * 
+     * @param array $debug_info Debug-Informationen vom fehlgeschlagenen Request
+     * @return array|WP_Error
+     */
+    private function load_fallback_data($debug_info = array()) {
+        // Versuche lokale Example-Datei zu laden
+        $example_file = BRK_IMPRESSUM_PLUGIN_DIR . 'facilities-example.json';
+        
+        if (file_exists($example_file)) {
+            $json_data = file_get_contents($example_file);
+            $data = json_decode($json_data, true);
+            
+            if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+                // Cache setzen mit kürzerer Laufzeit (1 Stunde)
+                set_transient(self::CACHE_KEY, $data, 3600);
+                error_log('BRK Impressum: Fallback-Daten aus lokaler Datei geladen');
+                return $data;
+            }
+        }
+        
+        // Hardcoded Fallback-Daten als letzter Ausweg
+        $fallback_data = $this->get_hardcoded_fallback_data();
+        set_transient(self::CACHE_KEY, $fallback_data, 3600);
+        error_log('BRK Impressum: Hardcoded Fallback-Daten verwendet');
+        return $fallback_data;
+    }
+    
+    /**
+     * Hardcoded Fallback-Daten
+     * 
+     * @return array
+     */
+    private function get_hardcoded_fallback_data() {
+        return array(
+            array(
+                'id' => '000',
+                'ebene' => 'Landesverband',
+                'name' => 'BRK Landesverband Bayern',
+                'anschrift' => array(
+                    'strasse' => 'Garmischer Straße 19-21',
+                    'plz' => '81373',
+                    'ort' => 'München'
+                ),
+                'kontakt' => array(
+                    'telefon' => '089 9241-0',
+                    'email' => 'info@brk.de'
+                ),
+                'vorstand' => array(
+                    'funktion' => 'Präsident',
+                    'name' => 'Dr. Beispiel Präsident'
+                ),
+                'geschaeftsfuehrung' => array(
+                    'funktion' => 'Generalsekretär',
+                    'name' => 'Max Mustermann',
+                    'email' => 'generalsekretaer@brk.de'
+                )
+            ),
+            array(
+                'id' => '001',
+                'ebene' => 'Kreisverband',
+                'name' => 'BRK Beispiel-Kreisverband',
+                'anschrift' => array(
+                    'strasse' => 'Beispielstraße 1',
+                    'plz' => '80000',
+                    'ort' => 'München'
+                ),
+                'kontakt' => array(
+                    'telefon' => '089 12345-0',
+                    'email' => 'info@beispiel.brk.de'
+                ),
+                'vorstand' => array(
+                    'funktion' => 'Vorsitzender',
+                    'name' => 'Erika Mustermann'
+                ),
+                'geschaeftsfuehrung' => array(
+                    'funktion' => 'Geschäftsführer',
+                    'name' => 'Hans Beispiel',
+                    'email' => 'geschaeftsfuehrung@beispiel.brk.de'
+                )
+            )
+        );
+    }
+    
+    /**
+     * Letzte Fehlerinformationen abrufen
+     * 
+     * @return array|false
+     */
+    public function get_last_error_info() {
+        return get_transient('brk_impressum_last_error');
+    }
+    
+    /**
+     * API-Verbindung testen
+     * 
+     * @return array Test-Ergebnis mit Details
+     */
+    public function test_api_connection() {
+        $result = array(
+            'timestamp' => current_time('mysql'),
+            'url' => BRK_IMPRESSUM_FACILITIES_URL,
+            'success' => false
+        );
+        
+        $start_time = microtime(true);
+        
+        $response = wp_remote_get(BRK_IMPRESSUM_FACILITIES_URL, array(
+            'timeout' => 10,
+            'sslverify' => true,
+            'headers' => array(
+                'Accept' => 'application/json'
+            )
+        ));
+        
+        $result['duration'] = round((microtime(true) - $start_time) * 1000, 2) . ' ms';
+        
+        if (is_wp_error($response)) {
+            $result['error'] = $response->get_error_message();
+            $result['error_code'] = $response->get_error_code();
+            return $result;
+        }
+        
+        $result['http_code'] = wp_remote_retrieve_response_code($response);
+        $result['http_message'] = wp_remote_retrieve_response_message($response);
+        $headers = wp_remote_retrieve_headers($response);
+        $result['content_type'] = isset($headers['content-type']) ? $headers['content-type'] : 'unknown';
+        
+        $body = wp_remote_retrieve_body($response);
+        $result['body_length'] = strlen($body);
+        
+        if ($result['http_code'] === 200) {
+            $data = json_decode($body, true);
+            
+            if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+                $result['success'] = true;
+                $result['facilities_count'] = count($data);
+                $result['sample_ids'] = array_slice(array_column($data, 'id'), 0, 5);
+            } else {
+                $result['json_error'] = json_last_error_msg();
+                $result['body_preview'] = substr($body, 0, 200);
+            }
+        } else {
+            $result['body_preview'] = substr($body, 0, 500);
+        }
+        
+        return $result;
     }
 }

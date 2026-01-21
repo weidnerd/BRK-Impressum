@@ -1,0 +1,339 @@
+# 🔍 Erweiterte Fehlerdiagnose - BRK Impressum Plugin
+
+## ✅ Neue Features implementiert
+
+### 1. **Detaillierte Fehlerausgabe**
+- Alle API-Fehler werden jetzt im Backend angezeigt
+- Fehlertyp, Fehlermeldung, HTTP-Status, Zeitstempel
+- Vorschau der Serverantwort (erste 500 Zeichen)
+- Alle Informationen werden im PHP Error-Log gespeichert
+
+### 2. **Interaktiver Verbindungstest**
+- **Button "🧪 Verbindungstest durchführen"** im Admin-Backend
+- Zeigt detaillierte Diagnose-Informationen:
+  - ✅ Erfolg/Fehler Status
+  - HTTP Status-Code und Message
+  - Antwortzeit in Millisekunden
+  - Content-Type der Antwort
+  - Anzahl gefundener Facilities
+  - Beispiel-IDs der ersten 5 Facilities
+  - JSON-Parsing-Fehler (falls vorhanden)
+  - Antwort-Vorschau bei Fehlern
+
+### 3. **Debug-Transient**
+- Letzte Fehlerinformationen werden für 1 Stunde gespeichert
+- Werden im Backend automatisch angezeigt
+- Helfen bei der Fehlerdiagnose
+
+### 4. **Verbessertes Logging**
+- Alle API-Requests werden geloggt
+- Success: "Loaded X facilities"
+- Error: Vollständige Debug-Informationen
+
+## 🧪 So testen Sie die API-Verbindung
+
+### Im WordPress-Backend:
+
+1. **Gehen Sie zu: Einstellungen > BRK Impressum**
+
+2. **Klicken Sie auf: "🧪 Verbindungstest durchführen"**
+
+3. **Sie sehen eine der folgenden Meldungen:**
+
+#### ✅ Erfolg:
+```
+🔍 Verbindungstest abgeschlossen:
+
+✅ Erfolgreich!
+
+Details:
+HTTP Status: 200
+Antwortzeit: 234.56 ms
+Facilities gefunden: 95
+Content-Type: application/json
+Beispiel-IDs: 000, 001, 002, 003, 004
+
+Die API funktioniert korrekt!
+```
+
+#### ❌ Fehler:
+```
+🔍 Verbindungstest abgeschlossen:
+
+❌ Verbindung fehlgeschlagen
+
+Details:
+URL: https://mein.brk.de/data/facilities.json
+
+Fehler: cURL error 6: Could not resolve host: mein.brk.de
+Code: http_request_failed
+
+Antwortzeit: 0.12 ms
+```
+
+oder bei HTTP-Fehler:
+```
+HTTP Status: 404 - Not Found
+
+Content-Type: text/html
+
+Antwortgröße: 1234 Bytes
+
+Antwort-Vorschau:
+<!DOCTYPE html>
+<html>
+<head><title>404 Not Found</title></head>
+...
+```
+
+oder bei JSON-Fehler:
+```
+HTTP Status: 200
+
+JSON Fehler: Syntax error
+
+Content-Type: text/plain
+
+Antwort-Vorschau:
+This is not JSON content, just plain text...
+```
+
+## 🔍 Fehlerdetails auslesen
+
+### Im Backend:
+
+Wenn ein Fehler vorliegt, sehen Sie eine **gelbe Warnbox**:
+
+```
+⚠️ Hinweis: Fallback-Daten werden verwendet, da die Live-API nicht erreichbar ist.
+
+API-URL: https://mein.brk.de/data/facilities.json
+
+🔍 Fehlerdetails anzeigen ▼
+```
+
+Klicken Sie auf "Fehlerdetails anzeigen" um zu sehen:
+- Fehlertyp (WP_Error, HTTP_Error, JSON_Error, Format_Error)
+- Fehlermeldung
+- Fehlercode
+- HTTP Status
+- Zeitpunkt
+- Antwortgröße
+- Antwort-Vorschau
+
+### Im PHP Error-Log:
+
+```bash
+# Logs ansehen
+tail -f /pfad/zu/php-error.log
+
+# oder WordPress Debug-Log
+tail -f wp-content/debug.log
+```
+
+Sie sehen Einträge wie:
+```
+[21-Jan-2026 12:34:56 UTC] BRK Impressum API Error: Array
+(
+    [url] => https://mein.brk.de/data/facilities.json
+    [timestamp] => 2026-01-21 13:34:56
+    [error_type] => WP_Error
+    [error_message] => cURL error 6: Could not resolve host: mein.brk.de
+    [error_code] => http_request_failed
+)
+```
+
+## 📊 Mögliche Fehlertypen und Lösungen
+
+### 1. **WP_Error** - WordPress konnte Request nicht senden
+
+**Symptome:**
+```
+Fehlertyp: WP_Error
+Fehlermeldung: cURL error 6: Could not resolve host
+```
+
+**Ursachen:**
+- DNS-Problem
+- Server hat kein Internet
+- Firewall blockiert ausgehende Requests
+
+**Lösung:**
+```bash
+# DNS testen
+ping mein.brk.de
+
+# cURL direkt testen
+curl -v https://mein.brk.de/data/facilities.json
+
+# In wp-config.php Proxy konfigurieren (falls nötig)
+define('WP_PROXY_HOST', 'proxy.example.com');
+define('WP_PROXY_PORT', '8080');
+```
+
+### 2. **HTTP_Error** - Server antwortet mit Fehler
+
+**Symptome:**
+```
+Fehlertyp: HTTP_Error
+HTTP Status: 404 - Not Found
+```
+
+**Ursachen:**
+- URL ist falsch
+- Datei existiert nicht
+- Zugriff verweigert (401, 403)
+
+**Lösung:**
+```bash
+# URL im Browser testen
+# Sollte JSON zurückgeben
+
+# Oder mit wget/curl:
+wget -O - https://mein.brk.de/data/facilities.json
+```
+
+**Falls URL stimmt aber 403/401:**
+```php
+// In wp-config.php - API Key hinzufügen (falls nötig)
+define('BRK_API_KEY', 'ihr-api-key');
+
+// Dann in class-brk-facilities-loader.php:
+'headers' => array(
+    'Accept' => 'application/json',
+    'Authorization' => 'Bearer ' . BRK_API_KEY
+)
+```
+
+### 3. **JSON_Error** - Antwort ist kein gültiges JSON
+
+**Symptome:**
+```
+Fehlertyp: JSON_Error
+JSON Fehler: Syntax error
+Antwort-Vorschau: <!DOCTYPE html>...
+```
+
+**Ursachen:**
+- Server gibt HTML statt JSON zurück
+- JSON ist fehlerhaft formatiert
+- Server-Fehlerseite (500, 502, 503)
+
+**Lösung:**
+```bash
+# Antwort prüfen
+curl -s https://mein.brk.de/data/facilities.json | head -c 500
+
+# JSON validieren
+curl -s https://mein.brk.de/data/facilities.json | python -m json.tool
+```
+
+### 4. **Format_Error** - Daten haben falsches Format
+
+**Symptome:**
+```
+Fehlertyp: Format_Error
+Daten sind kein Array
+data_type: string
+```
+
+**Ursachen:**
+- JSON ist valid, aber kein Array
+- Falsches Datenformat
+
+**Lösung:**
+- Prüfen Sie die JSON-Struktur
+- Sollte ein Array sein: `[{...}, {...}]`
+- Nicht ein Objekt: `{data: [{...}]}`
+
+## 🛠️ Manuelle API-Tests
+
+### 1. Browser-Test
+```
+https://mein.brk.de/data/facilities.json
+```
+**Erwartung:** Download einer JSON-Datei oder Anzeige im Browser
+
+### 2. cURL-Test
+```bash
+curl -v https://mein.brk.de/data/facilities.json
+```
+**Erwartung:** Status 200, JSON-Daten
+
+### 3. WordPress-Test (WP-CLI)
+```bash
+wp eval '
+$response = wp_remote_get("https://mein.brk.de/data/facilities.json");
+if (is_wp_error($response)) {
+    echo "Fehler: " . $response->get_error_message() . "\n";
+} else {
+    echo "Status: " . wp_remote_retrieve_response_code($response) . "\n";
+    echo "Content-Type: " . wp_remote_retrieve_header($response, "content-type") . "\n";
+    echo "Body Length: " . strlen(wp_remote_retrieve_body($response)) . " bytes\n";
+}
+'
+```
+
+### 4. PHP-Test-Script
+```php
+<?php
+// test-api.php im WordPress-Root
+require_once('wp-load.php');
+
+$loader = BRK_Facilities_Loader::get_instance();
+$result = $loader->test_api_connection();
+
+echo "Test-Ergebnis:\n";
+print_r($result);
+
+echo "\n\nFacilities laden:\n";
+$facilities = $loader->get_facilities();
+
+if (is_wp_error($facilities)) {
+    echo "Fehler: " . $facilities->get_error_message() . "\n";
+} else {
+    echo "Erfolg! Anzahl: " . count($facilities) . "\n";
+    echo "Erste 3 IDs: " . implode(', ', array_slice(array_column($facilities, 'id'), 0, 3)) . "\n";
+}
+?>
+```
+
+Ausführen:
+```bash
+php test-api.php
+```
+
+## 📝 Checkliste für Support-Anfragen
+
+Wenn Sie den BRK-Support kontaktieren, geben Sie bitte an:
+
+- [ ] **Fehlertyp:** (aus "Fehlerdetails anzeigen")
+- [ ] **Fehlermeldung:** (aus "Fehlerdetails anzeigen")
+- [ ] **HTTP Status:** (falls vorhanden)
+- [ ] **Zeitpunkt:** (wann trat der Fehler auf)
+- [ ] **Verbindungstest-Ergebnis:** (Screenshot oder Text)
+- [ ] **PHP Version:** (aus Debug-Informationen)
+- [ ] **WordPress Version:** (aus Debug-Informationen)
+- [ ] **Server-Typ:** (Apache/Nginx, Hoster-Name)
+- [ ] **Firewall/Proxy:** (Ja/Nein/Unbekannt)
+- [ ] **PHP Error-Log:** (relevante Zeilen)
+
+## 🎯 Zusammenfassung
+
+**Das Plugin zeigt jetzt:**
+1. ✅ Alle Fehlerdetails im Backend
+2. ✅ Interaktiven Verbindungstest
+3. ✅ Detaillierte Logs
+4. ✅ Hilfreiche Fehlermeldungen
+5. ✅ Antwort-Vorschauen
+
+**Sie können jetzt:**
+- Sofort sehen, warum die API nicht funktioniert
+- Die Verbindung testen ohne Code zu schreiben
+- Support mit präzisen Informationen kontaktieren
+- Selbstständig Probleme diagnostizieren
+
+---
+
+**Version:** 1.0.1 mit erweiterter Fehlerdiagnose  
+**Datum:** 21. Januar 2026

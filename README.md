@@ -172,10 +172,27 @@ brk-impressum/
 **Problem:** "Die Facilities-Daten konnten nicht geladen werden"
 
 **Lösung:**
+
+Das Plugin verwendet automatisch **Fallback-Daten**, wenn die API nicht erreichbar ist:
+
+1. **Automatischer Fallback**: Das Plugin lädt lokale Beispieldaten aus `facilities-example.json`
+2. **Hardcoded-Fallback**: Falls keine lokale Datei existiert, werden minimale Demo-Daten verwendet
+3. **Testen**: Klicken Sie auf "API-Verbindung testen" in den Debug-Informationen
+
+**Für Produktivumgebungen:**
 1. Überprüfen Sie die Verbindung zu `https://mein.brk.de/data/facilities.json`
 2. Stellen Sie sicher, dass SSL-Zertifikate korrekt konfiguriert sind
-3. Prüfen Sie die PHP-Fehlerlog-Datei
+3. Prüfen Sie die PHP-Fehlerlog-Datei: `tail -f /pfad/zu/php-error.log`
 4. Versuchen Sie, den Cache zu aktualisieren
+5. Kontaktieren Sie den BRK-Administrator für API-Zugang
+
+**Debug-Modus:**
+```php
+// In wp-config.php
+define('WP_DEBUG', true);
+define('WP_DEBUG_LOG', true);
+```
+Prüfen Sie dann `wp-content/debug.log` auf Fehler.
 
 ### Vorschau wird nicht angezeigt
 

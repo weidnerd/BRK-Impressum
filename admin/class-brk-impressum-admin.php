@@ -108,20 +108,75 @@ class BRK_Impressum_Admin {
         $settings = BRK_Impressum_Settings::get_instance()->get_settings();
         $loader = BRK_Facilities_Loader::get_instance();
         $facilities = $loader->get_facilities_for_select();
+        $last_error = $loader->get_last_error_info();
         
         ?>
         <div class="wrap brk-impressum-admin">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             
-            <?php if (is_wp_error($facilities) || empty($facilities)): ?>
-                <div class="notice notice-error">
-                    <p><strong>Fehler:</strong> Die Facilities-Daten konnten nicht geladen werden.</p>
-                    <p>Bitte überprüfen Sie die Verbindung zu <code><?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?></code></p>
+            <?php if ($last_error && is_array($last_error)): ?>
+                <div class="notice notice-warning">
+                    <p><strong>⚠️ Hinweis:</strong> Fallback-Daten werden verwendet, da die Live-API nicht erreichbar ist.</p>
+                    <p><strong>API-URL:</strong> <code><?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?></code></p>
+                    
+                    <details style="margin: 10px 0;">
+                        <summary style="cursor: pointer; font-weight: 600; padding: 5px 0;">🔍 Fehlerdetails anzeigen</summary>
+                        <div style="margin-top: 10px; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                            <?php if (isset($last_error['error_type'])): ?>
+                                <strong>Fehlertyp:</strong> <?php echo esc_html($last_error['error_type']); ?><br>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($last_error['error_message'])): ?>
+                                <strong>Fehlermeldung:</strong> <?php echo esc_html($last_error['error_message']); ?><br>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($last_error['error_code'])): ?>
+                                <strong>Fehlercode:</strong> <?php echo esc_html($last_error['error_code']); ?><br>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($last_error['http_code'])): ?>
+                                <strong>HTTP Status:</strong> <?php echo esc_html($last_error['http_code']); ?>
+                                <?php if (isset($last_error['http_message'])): ?>
+                                    - <?php echo esc_html($last_error['http_message']); ?>
+                                <?php endif; ?>
+                                <br>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($last_error['timestamp'])): ?>
+                                <strong>Zeitpunkt:</strong> <?php echo esc_html($last_error['timestamp']); ?><br>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($last_error['body_length'])): ?>
+                                <strong>Antwortgröße:</strong> <?php echo esc_html($last_error['body_length']); ?> Bytes<br>
+                            <?php endif; ?>
+                            
+                            <?php if (isset($last_error['response_body_preview']) || isset($last_error['body_preview'])): ?>
+                                <strong>Antwort-Vorschau:</strong><br>
+                                <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 200px; white-space: pre-wrap;"><?php 
+                                    echo esc_html($last_error['response_body_preview'] ?? $last_error['body_preview']); 
+                                ?></pre>
+                            <?php endif; ?>
+                        </div>
+                    </details>
+                    
+                    <p>Die Beispieldaten können für Tests verwendet werden. Für Produktionsdaten kontaktieren Sie bitte den BRK-Support.</p>
                     <p>
                         <button type="button" class="button" id="brk-refresh-cache">
-                            Cache aktualisieren
+                            🔄 Erneut versuchen
+                        </button>
+                        <button type="button" class="button" id="brk-test-api" style="margin-left: 10px;">
+                            🧪 Verbindungstest durchführen
                         </button>
                     </p>
+                </div>
+            <?php elseif (empty($facilities)): ?>
+                <div class="notice notice-info">
+                    <p><strong>ℹ️ Info:</strong> Demo-Daten werden verwendet.</p>
+                    <p>Sie können das Plugin normal nutzen. Für Live-Daten stellen Sie sicher, dass die API erreichbar ist.</p>
+                </div>
+            <?php else: ?>
+                <div class="notice notice-success" style="border-left-color: #46b450;">
+                    <p><strong>✓ API erfolgreich verbunden!</strong> Es werden Live-Daten verwendet.</p>
                 </div>
             <?php endif; ?>
             
@@ -243,6 +298,50 @@ class BRK_Impressum_Admin {
                         <button type="button" class="button" id="brk-refresh-cache">
                             Daten jetzt aktualisieren
                         </button>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Fehlerbehebung</h3>
+                        <details>
+                            <summary style="cursor: pointer; padding: 5px 0; font-weight: 600;">Debug-Informationen anzeigen</summary>
+                            <div style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 3px; font-family: monospace; font-size: 12px;">
+                                <strong>API-URL:</strong><br>
+                                <?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?><br><br>
+                                
+                                <strong>Cache-Status:</strong><br>
+                                <?php 
+                                $cached = get_transient('brk_facilities_data');
+                                echo $cached !== false ? '✓ Aktiv' : '✗ Leer'; 
+                                ?><br><br>
+                                
+                                <strong>Anzahl Facilities:</strong><br>
+                                <?php echo count($facilities); ?><br><br>
+                                
+                                <strong>Plugin-Verzeichnis:</strong><br>
+                                <?php echo esc_html(BRK_IMPRESSUM_PLUGIN_DIR); ?><br><br>
+                                
+                                <strong>WordPress Version:</strong><br>
+                                <?php echo esc_html(get_bloginfo('version')); ?><br><br>
+                                
+                                <strong>PHP Version:</strong><br>
+                                <?php echo esc_html(PHP_VERSION); ?><br><br>
+                                
+                                <button type="button" class="button button-small" onclick="
+                                    fetch('<?php echo esc_url(BRK_IMPRESSUM_FACILITIES_URL); ?>')
+                                        .then(r => r.ok ? alert('✓ API erreichbar (Status: ' + r.status + ')') : alert('✗ API Fehler: ' + r.status))
+                                        .catch(e => alert('✗ API nicht erreichbar: ' + e.message));
+                                ">
+                                    API-Verbindung testen
+                                </button>
+                            </div>
+                        </details>
+                        
+                        <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffb900; font-size: 13px;">
+                            <strong>Falls Probleme auftreten:</strong><br>
+                            1. Klicken Sie auf "Daten jetzt aktualisieren"<br>
+                            2. Prüfen Sie die API-Verbindung (Button oben)<br>
+                            3. Kontaktieren Sie den Support mit den Debug-Infos
+                        </div>
                     </div>
                 </div>
                 

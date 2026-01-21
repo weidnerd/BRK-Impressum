@@ -22,6 +22,7 @@
             $('#brk-preview-btn').on('click', this.showPreview.bind(this));
             $('#brk-save-btn').on('click', this.saveImpressum.bind(this));
             $('#brk-refresh-cache').on('click', this.refreshCache.bind(this));
+            $('#brk-test-api').on('click', this.testApiConnection.bind(this));
             $('#brk-impressum-form').on('submit', this.handleFormSubmit.bind(this));
             
             // Facility-Auswahl
@@ -169,6 +170,7 @@
             e.preventDefault();
             
             const $btn = $(e.currentTarget);
+            const originalText = $btn.text();
             $btn.prop('disabled', true).text('Aktualisiere...');
             
             $.ajax({
@@ -192,7 +194,100 @@
                         errorMsg += ' ' + xhr.responseJSON.message;
                     }
                     this.showMessage('error', errorMsg);
-                    $btn.prop('disabled', false).text('Daten jetzt aktualisieren');
+                    $btn.prop('disabled', false).text(originalText);
+                }.bind(this)
+            });
+        },
+        
+        /**
+         * API-Verbindung testen
+         */
+        testApiConnection: function(e) {
+            e.preventDefault();
+            
+            const $btn = $(e.currentTarget);
+            const originalText = $btn.text();
+            $btn.prop('disabled', true).text('🔄 Teste...');
+            
+            this.showMessage('info', 'Verbindungstest läuft...');
+            
+            $.ajax({
+                url: brkImpressum.restUrl + 'test-connection',
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', brkImpressum.restNonce);
+                },
+                success: function(response) {
+                    let message = '<strong>🔍 Verbindungstest abgeschlossen:</strong><br><br>';
+                    
+                    if (response.success) {
+                        message += '✅ <strong>Erfolgreich!</strong><br><br>';
+                        message += '<strong>Details:</strong><br>';
+                        message += 'HTTP Status: ' + response.http_code + '<br>';
+                        message += 'Antwortzeit: ' + response.duration + '<br>';
+                        message += 'Facilities gefunden: ' + response.facilities_count + '<br>';
+                        message += 'Content-Type: ' + response.content_type + '<br>';
+                        if (response.sample_ids && response.sample_ids.length > 0) {
+                            message += 'Beispiel-IDs: ' + response.sample_ids.join(', ') + '<br>';
+                        }
+                        message += '<br><em>Die API funktioniert korrekt!</em>';
+                        this.showMessage('success', message);
+                    } else {
+                        message += '❌ <strong>Verbindung fehlgeschlagen</strong><br><br>';
+                        message += '<strong>Details:</strong><br>';
+                        message += 'URL: <code>' + response.url + '</code><br>';
+                        
+                        if (response.error) {
+                            message += '<br><strong>Fehler:</strong> ' + response.error + '<br>';
+                            if (response.error_code) {
+                                message += 'Code: ' + response.error_code + '<br>';
+                            }
+                        }
+                        
+                        if (response.http_code) {
+                            message += '<br><strong>HTTP Status:</strong> ' + response.http_code;
+                            if (response.http_message) {
+                                message += ' - ' + response.http_message;
+                            }
+                            message += '<br>';
+                        }
+                        
+                        if (response.json_error) {
+                            message += '<br><strong>JSON Fehler:</strong> ' + response.json_error + '<br>';
+                        }
+                        
+                        if (response.content_type) {
+                            message += '<br><strong>Content-Type:</strong> ' + response.content_type + '<br>';
+                        }
+                        
+                        if (response.body_length) {
+                            message += '<strong>Antwortgröße:</strong> ' + response.body_length + ' Bytes<br>';
+                        }
+                        
+                        if (response.body_preview) {
+                            message += '<br><strong>Antwort-Vorschau:</strong><br>';
+                            message += '<pre style="background:#f5f5f5;padding:10px;max-height:150px;overflow:auto;font-size:11px;">' + 
+                                       this.escapeHtml(response.body_preview) + '</pre>';
+                        }
+                        
+                        if (response.duration) {
+                            message += '<br><strong>Antwortzeit:</strong> ' + response.duration;
+                        }
+                        
+                        this.showMessage('error', message);
+                    }
+                    
+                    $btn.prop('disabled', false).text(originalText);
+                }.bind(this),
+                error: function(xhr) {
+                    let errorMsg = '❌ <strong>Fehler beim Verbindungstest</strong><br><br>';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg += xhr.responseJSON.message;
+                    } else {
+                        errorMsg += 'Ein unerwarteter Fehler ist aufgetreten.';
+                    }
+                    this.showMessage('error', errorMsg);
+                    $btn.prop('disabled', false).text(originalText);
                 }.bind(this)
             });
         },
@@ -238,6 +333,20 @@
         validateEmail: function(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
+        },
+        
+        /**
+         * HTML escapen für sichere Ausgabe
+         */
+        escapeHtml: function(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         },
         
         /**

@@ -171,6 +171,24 @@ class BRK_Impressum {
                 return current_user_can('manage_options');
             }
         ));
+        
+        register_rest_route('brk-impressum/v1', '/test-connection', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'test_connection_endpoint'),
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            }
+        ));
+    }
+    
+    /**
+     * REST: API-Verbindung testen
+     */
+    public function test_connection_endpoint($request) {
+        $loader = BRK_Facilities_Loader::get_instance();
+        $result = $loader->test_api_connection();
+        
+        return rest_ensure_response($result);
     }
     
     /**
