@@ -138,33 +138,10 @@ class BRK_Facilities_Loader {
             return $this->load_fallback_data($debug_info);
         }
         
-        // Debug: Struktur analysieren
-        error_log('BRK Impressum: Raw data count: ' . count($data));
-        if (isset($data[0])) {
-            error_log('BRK Impressum: data[0] is_array: ' . (is_array($data[0]) ? 'yes' : 'no'));
-            if (is_array($data[0])) {
-                error_log('BRK Impressum: data[0] count: ' . count($data[0]));
-                error_log('BRK Impressum: data[0] has id: ' . (isset($data[0]['id']) ? 'yes' : 'no'));
-                error_log('BRK Impressum: data[0] has name: ' . (isset($data[0]['name']) ? 'yes' : 'no'));
-            }
-        }
-        
-        // Prüfen, ob die Daten verschachtelt sind
-        // Fall 1: Array mit einem Element, das ein großes Array von Facilities enthält
-        if (count($data) === 1 && isset($data[0]) && is_array($data[0]) && count($data[0]) > 10) {
-            error_log('BRK Impressum: Detected nested structure (single wrapper), extracting ' . count($data[0]) . ' facilities');
-            $data = $data[0];
-        }
-        // Fall 2: Direktes Array, aber erstes Element hat keine id/name (ist selbst ein Wrapper)
-        elseif (isset($data[0]) && is_array($data[0]) && !isset($data[0]['id']) && !isset($data[0]['name'])) {
-            // Prüfen ob es numerische Schlüssel mit id/name hat
-            foreach ($data[0] as $key => $item) {
-                if (is_numeric($key) && is_array($item) && isset($item['id']) && isset($item['name'])) {
-                    error_log('BRK Impressum: Detected nested structure (wrapper without id/name), extracting ' . count($data[0]) . ' facilities');
-                    $data = $data[0];
-                    break;
-                }
-            }
+        // API-Struktur: {"brk_facilities": [...]} - Array extrahieren
+        if (isset($data['brk_facilities']) && is_array($data['brk_facilities'])) {
+            error_log('BRK Impressum: Extracting facilities from brk_facilities key');
+            $data = $data['brk_facilities'];
         }
         
         // Finale Validierung: Prüfen ob wir valide Facilities haben
