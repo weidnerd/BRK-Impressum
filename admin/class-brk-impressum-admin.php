@@ -183,7 +183,7 @@ class BRK_Impressum_Admin {
                                                    value="<?php echo esc_attr($settings['responsible_email']); ?>" 
                                                    required>
                                             <p class="description">
-                                                Kontakt-E-Mail des Verantwortlichen
+                                                Kontakt-E-Mail des Webmasters
                                             </p>
                                         </td>
                                     </tr>
