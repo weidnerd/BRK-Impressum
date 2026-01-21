@@ -316,9 +316,12 @@ class BRK_Impressum {
             return '<p><em>Impressum wurde noch nicht konfiguriert.</em></p>';
         }
         
+        // Sicherstellen, dass facility_id als String vorliegt
+        $facility_id = strval($settings['facility_id']);
+        
         $generator = BRK_Impressum_Generator::get_instance();
         $html = $generator->generate_impressum(
-            $settings['facility_id'],
+            $facility_id,
             $settings['responsible_name'],
             $settings['responsible_function'],
             $settings['responsible_email']

@@ -48,6 +48,9 @@ class BRK_Impressum_Generator {
      * @return string|WP_Error HTML-String des Impressums oder WP_Error
      */
     public function generate_impressum($facility_id, $responsible_name, $responsible_function, $responsible_email) {
+        // Facility ID IMMER als String behandeln
+        $facility_id = strval($facility_id);
+        
         // Debug-Logging
         error_log('BRK Impressum: Generating impressum for facility_id: [' . $facility_id . '] (type: ' . gettype($facility_id) . ')');
         error_log('BRK Impressum: Comparison result ($facility_id !== "000"): ' . var_export($facility_id !== '000', true));
