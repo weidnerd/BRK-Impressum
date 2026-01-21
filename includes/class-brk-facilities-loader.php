@@ -226,8 +226,8 @@ class BRK_Facilities_Loader {
             }
         }
         
-        // Nach Name sortieren
-        asort($options);
+        // Nach ID sortieren
+        ksort($options);
         
         return $options;
     }
