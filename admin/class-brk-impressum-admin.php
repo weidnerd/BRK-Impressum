@@ -33,6 +33,27 @@ class BRK_Impressum_Admin {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_init', array($this, 'handle_cache_clear'));
+    }
+    
+    /**
+     * Cache löschen wenn URL-Parameter vorhanden
+     */
+    public function handle_cache_clear() {
+        if (isset($_GET['brk_clear_cache']) && $_GET['brk_clear_cache'] === '1' && 
+            isset($_GET['page']) && $_GET['page'] === 'brk-impressum' &&
+            current_user_can('manage_options') &&
+            check_admin_referer('brk_clear_cache', 'brk_nonce')) {
+            
+            delete_transient('brk_impressum_facilities');
+            delete_transient('brk_impressum_last_error');
+            
+            wp_safe_redirect(add_query_arg(array(
+                'page' => 'brk-impressum',
+                'cache_cleared' => '1'
+            ), admin_url('options-general.php')));
+            exit;
+        }
     }
     
     /**
@@ -113,6 +134,12 @@ class BRK_Impressum_Admin {
         ?>
         <div class="wrap brk-impressum-admin">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+            
+            <?php if (isset($_GET['cache_cleared']) && $_GET['cache_cleared'] === '1'): ?>
+                <div class="notice notice-success is-dismissible">
+                    <p><strong>✓ Cache erfolgreich gelöscht!</strong> Die Daten werden jetzt neu von der API geladen.</p>
+                </div>
+            <?php endif; ?>
             
             <?php if ($last_error && is_array($last_error)): ?>
                 <div class="notice notice-warning">
@@ -207,6 +234,11 @@ class BRK_Impressum_Admin {
                                                 <button type="button" class="button" id="brk-test-api">
                                                     🧪 Verbindungstest durchführen
                                                 </button>
+                                                <a href="<?php echo wp_nonce_url(add_query_arg(array('page' => 'brk-impressum', 'brk_clear_cache' => '1'), admin_url('options-general.php')), 'brk_clear_cache', 'brk_nonce'); ?>" 
+                                                   class="button" 
+                                                   style="margin-left: 10px;">
+                                                    🗑️ Cache löschen
+                                                </a>
                                             <?php else: ?>
                                             <select name="facility_id" id="facility_id" class="regular-text" required>
                                                 <option value="">-- Bitte wählen --</option>
