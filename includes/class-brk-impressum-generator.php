@@ -237,8 +237,6 @@ class BRK_Impressum_Generator {
     private function get_static_content() {
         ob_start();
         ?>
-        <p>Für unsere Einrichtungen ist nach MPBetreibV ein örtlicher Beauftragter für Medizinproduktesicherheit bestellt. Er ist erreichbar unter <a href="mailto:medizinproduktesicherheit@kvamberg-sulzbach.brk.de">medizinproduktesicherheit(at)kvamberg-sulzbach.brk.de</a></p>
-        
         <p>Das Bayerische Rote Kreuz stellt seine Inhalte im Internet sorgfältig zusammen, übernimmt jedoch keine Haftung für mögliche Übertragungsfehler von Schriftstücken oder Fehler auf Grund unbefugter Veränderungen durch Dritte.</p>
         
         <p>Eine Gewährleistung für die Vollständigkeit, Richtigkeit und Aktualität kann nicht übernommen werden.</p>
