@@ -234,58 +234,6 @@ class BRK_Impressum_Admin {
                             <li>Sie können das Impressum auch per Shortcode <code>[brk_impressum]</code> einbinden</li>
                         </ul>
                     </div>
-                    
-                    <div class="card">
-                        <h3>Cache-Verwaltung</h3>
-                        <p>Die Facilities-Daten werden für 24 Stunden zwischengespeichert.</p>
-                        <button type="button" class="button" id="brk-refresh-cache">
-                            Daten jetzt aktualisieren
-                        </button>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>Fehlerbehebung</h3>
-                        <details>
-                            <summary style="cursor: pointer; padding: 5px 0; font-weight: 600;">Debug-Informationen anzeigen</summary>
-                            <div style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 3px; font-family: monospace; font-size: 12px;">
-                                <strong>API-URL:</strong><br>
-                                <?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?><br><br>
-                                
-                                <strong>Cache-Status:</strong><br>
-                                <?php 
-                                $cached = get_transient('brk_facilities_data');
-                                echo $cached !== false ? '✓ Aktiv' : '✗ Leer'; 
-                                ?><br><br>
-                                
-                                <strong>Anzahl Facilities:</strong><br>
-                                <?php echo count($facilities); ?><br><br>
-                                
-                                <strong>Plugin-Verzeichnis:</strong><br>
-                                <?php echo esc_html(BRK_IMPRESSUM_PLUGIN_DIR); ?><br><br>
-                                
-                                <strong>WordPress Version:</strong><br>
-                                <?php echo esc_html(get_bloginfo('version')); ?><br><br>
-                                
-                                <strong>PHP Version:</strong><br>
-                                <?php echo esc_html(PHP_VERSION); ?><br><br>
-                                
-                                <button type="button" class="button button-small" onclick="
-                                    fetch('<?php echo esc_url(BRK_IMPRESSUM_FACILITIES_URL); ?>')
-                                        .then(r => r.ok ? alert('✓ API erreichbar (Status: ' + r.status + ')') : alert('✗ API Fehler: ' + r.status))
-                                        .catch(e => alert('✗ API nicht erreichbar: ' + e.message));
-                                ">
-                                    API-Verbindung testen
-                                </button>
-                            </div>
-                        </details>
-                        
-                        <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffb900; font-size: 13px;">
-                            <strong>Falls Probleme auftreten:</strong><br>
-                            1. Klicken Sie auf "Daten jetzt aktualisieren"<br>
-                            2. Prüfen Sie die API-Verbindung (Button oben)<br>
-                            3. Kontaktieren Sie den Support mit den Debug-Infos
-                        </div>
-                    </div>
                 </div>
                 
                 <div class="brk-impressum-preview-section">
