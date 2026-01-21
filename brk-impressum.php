@@ -240,11 +240,6 @@ class BRK_Impressum {
     public function save_impressum_endpoint($request) {
         $params = $request->get_json_params();
         
-        // Debug-Logging
-        error_log('BRK Impressum: save_impressum_endpoint called');
-        error_log('BRK Impressum: Request params: ' . print_r($params, true));
-        error_log('BRK Impressum: facility_id value: [' . $params['facility_id'] . '] type: ' . gettype($params['facility_id']));
-        
         // Einstellungen speichern
         $settings = array(
             'facility_id' => sanitize_text_field($params['facility_id']),
@@ -254,7 +249,6 @@ class BRK_Impressum {
             'last_updated' => current_time('mysql')
         );
         
-        error_log('BRK Impressum: Saving settings: ' . print_r($settings, true));
         update_option('brk_impressum_settings', $settings);
         
         // Impressum-Seite erstellen oder aktualisieren
@@ -263,8 +257,6 @@ class BRK_Impressum {
         if (is_wp_error($page_id)) {
             return new WP_Error('save_error', $page_id->get_error_message(), array('status' => 500));
         }
-        
-        error_log('BRK Impressum: Page saved with ID: ' . $page_id);
         
         return rest_ensure_response(array(
             'success' => true,
@@ -277,9 +269,6 @@ class BRK_Impressum {
      * Impressum-Seite erstellen oder aktualisieren
      */
     private function create_or_update_impressum_page($params) {
-        // Debug-Logging
-        error_log('BRK Impressum: create_or_update_impressum_page called with facility_id: [' . $params['facility_id'] . ']');
-        
         $generator = BRK_Impressum_Generator::get_instance();
         $content = $generator->generate_impressum(
             $params['facility_id'],
@@ -291,9 +280,6 @@ class BRK_Impressum {
         if (is_wp_error($content)) {
             return $content;
         }
-        
-        // Debug: Prüfe den generierten Inhalt
-        error_log('BRK Impressum: Generated content length: ' . strlen($content) . ' bytes');
         
         // Prüfen, ob bereits eine Impressum-Seite existiert
         $page = get_page_by_path('impressum');

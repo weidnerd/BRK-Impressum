@@ -51,10 +51,6 @@ class BRK_Impressum_Generator {
         // Facility ID IMMER als String behandeln
         $facility_id = strval($facility_id);
         
-        // Debug-Logging
-        error_log('BRK Impressum: Generating impressum for facility_id: [' . $facility_id . '] (type: ' . gettype($facility_id) . ')');
-        error_log('BRK Impressum: Comparison result ($facility_id !== "000"): ' . var_export($facility_id !== '000', true));
-        
         // Facility-Daten laden
         $facility = $this->loader->get_facility_by_id($facility_id);
         
@@ -93,7 +89,6 @@ class BRK_Impressum_Generator {
         ob_start();
         ?>
         <div class="brk-impressum">
-            <!-- DEBUG: facility_id=[<?php echo esc_html($facility_id); ?>], comparison=(<?php echo var_export($facility_id !== '000', true); ?>) -->
             <h2>Anbieterkennung nach § 5 TMG</h2>
             
             <p>Webmaster für die Administration der Domain <strong><?php echo esc_html($domain); ?></strong> ist:</p>
