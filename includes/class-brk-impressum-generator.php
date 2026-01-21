@@ -49,7 +49,8 @@ class BRK_Impressum_Generator {
      */
     public function generate_impressum($facility_id, $responsible_name, $responsible_function, $responsible_email) {
         // Debug-Logging
-        error_log('BRK Impressum: Generating impressum for facility_id: ' . $facility_id);
+        error_log('BRK Impressum: Generating impressum for facility_id: [' . $facility_id . '] (type: ' . gettype($facility_id) . ')');
+        error_log('BRK Impressum: Comparison result ($facility_id !== "000"): ' . var_export($facility_id !== '000', true));
         
         // Facility-Daten laden
         $facility = $this->loader->get_facility_by_id($facility_id);
@@ -88,6 +89,9 @@ class BRK_Impressum_Generator {
         ob_start();
         ?>
         <div class="brk-impressum">
+            <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
+            <!-- DEBUG: facility_id=[<?php echo esc_html($facility_id); ?>], is_landesverband=<?php echo $facility_id === '000' ? 'YES' : 'NO'; ?> -->
+            <?php endif; ?>
             <h2>Anbieterkennung nach § 5 TMG</h2>
             
             <p>Redakteur und Webmaster für die Planung, Realisierung und Betreuung der Internetinhalte sowie für die Administration der Domain <strong><?php echo esc_html($domain); ?></strong> ist:</p>
