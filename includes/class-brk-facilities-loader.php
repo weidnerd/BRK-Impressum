@@ -138,14 +138,31 @@ class BRK_Facilities_Loader {
             return $this->load_fallback_data($debug_info);
         }
         
-        // Prüfen, ob die Daten verschachtelt sind (Array mit einem Element, das wiederum das Array enthält)
-        if (count($data) === 1 && isset($data[0]) && is_array($data[0])) {
-            // Prüfen ob das erste Element ein Array von Facilities ist
-            $first_item = $data[0];
-            if (is_array($first_item) && isset($first_item[0]) && is_array($first_item[0])) {
-                // Daten sind verschachtelt - inneres Array extrahieren
-                error_log('BRK Impressum: Detected nested array structure, extracting inner array');
-                $data = $first_item;
+        // Prüfen, ob die Daten verschachtelt sind
+        // Fall 1: Array mit einem Element, das ein großes Array von Facilities enthält
+        if (count($data) === 1 && isset($data[0]) && is_array($data[0]) && count($data[0]) > 10) {
+            error_log('BRK Impressum: Detected nested structure (single wrapper), extracting ' . count($data[0]) . ' facilities');
+            $data = $data[0];
+        }
+        // Fall 2: Direktes Array, aber erstes Element hat keine id/name (ist selbst ein Wrapper)
+        elseif (isset($data[0]) && is_array($data[0]) && !isset($data[0]['id']) && !isset($data[0]['name'])) {
+            // Prüfen ob es numerische Schlüssel mit id/name hat
+            foreach ($data[0] as $key => $item) {
+                if (is_numeric($key) && is_array($item) && isset($item['id']) && isset($item['name'])) {
+                    error_log('BRK Impressum: Detected nested structure (wrapper without id/name), extracting ' . count($data[0]) . ' facilities');
+                    $data = $data[0];
+                    break;
+                }
+            }
+        }
+        
+        // Finale Validierung: Prüfen ob wir valide Facilities haben
+        $valid_count = 0;
+        if (is_array($data)) {
+            foreach ($data as $item) {
+                if (is_array($item) && isset($item['id']) && isset($item['name'])) {
+                    $valid_count++;
+                }
             }
         }
         
@@ -154,7 +171,8 @@ class BRK_Facilities_Loader {
         
         $debug_info['success'] = true;
         $debug_info['facilities_count'] = count($data);
-        error_log('BRK Impressum Success: Loaded ' . count($data) . ' facilities');
+        $debug_info['valid_facilities'] = $valid_count;
+        error_log('BRK Impressum Success: Loaded ' . count($data) . ' facilities (' . $valid_count . ' valid)');
         
         // Daten im Cache speichern
         set_transient(self::CACHE_KEY, $data, self::CACHE_DURATION);
