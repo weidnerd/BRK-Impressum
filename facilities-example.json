@@ -1,0 +1,94 @@
+[
+  {
+    "id": "000",
+    "ebene": "Landesverband",
+    "name": "BRK Landesverband Bayern",
+    "anschrift": {
+      "strasse": "Garmischer Straße 19-21",
+      "plz": "81373",
+      "ort": "München"
+    },
+    "kontakt": {
+      "telefon": "089 9241-0",
+      "email": "info@brk.de"
+    },
+    "vorstand": {
+      "funktion": "Präsident",
+      "name": "Max Mustermann"
+    },
+    "geschaeftsfuehrung": {
+      "funktion": "Generalsekretär",
+      "name": "Erika Musterfrau",
+      "email": "generalsekretaer@brk.de"
+    }
+  },
+  {
+    "id": "001",
+    "ebene": "Kreisverband",
+    "name": "BRK Kreisverband München",
+    "anschrift": {
+      "strasse": "Hofmannstraße 63",
+      "plz": "81379",
+      "ort": "München"
+    },
+    "kontakt": {
+      "telefon": "089 62420-0",
+      "email": "info@kvmuenchen.brk.de"
+    },
+    "vorstand": {
+      "funktion": "Vorsitzender",
+      "name": "Hans Müller"
+    },
+    "geschaeftsfuehrung": {
+      "funktion": "Geschäftsführer",
+      "name": "Anna Schmidt",
+      "email": "anna.schmidt@kvmuenchen.brk.de"
+    }
+  },
+  {
+    "id": "002",
+    "ebene": "Kreisverband",
+    "name": "BRK Kreisverband Nürnberg-Stadt",
+    "anschrift": {
+      "strasse": "Sulzbacher Straße 42",
+      "plz": "90489",
+      "ort": "Nürnberg"
+    },
+    "kontakt": {
+      "telefon": "0911 5301-0",
+      "email": "info@kvnuernberg-stadt.brk.de"
+    },
+    "vorstand": {
+      "funktion": "Vorsitzende",
+      "name": "Maria Weber"
+    },
+    "geschaeftsfuehrung": {
+      "funktion": "Geschäftsführerin",
+      "name": "Thomas Bauer",
+      "email": "thomas.bauer@kvnuernberg-stadt.brk.de"
+    }
+  },
+  {
+    "id": "003",
+    "ebene": "Bezirksverband",
+    "name": "BRK Bezirksverband Oberbayern",
+    "anschrift": {
+      "strasse": "Garmischer Straße 19-21",
+      "plz": "81373",
+      "ort": "München"
+    },
+    "kontakt": {
+      "telefon": "089 9241-1400",
+      "email": "info@bvoberbayern.brk.de"
+    },
+    "vorstand": {
+      "funktion": "Bezirksvorsitzender",
+      "name": "Franz Huber"
+    },
+    "geschaeftsfuehrung": {
+      "funktion": "Bezirksgeschäftsführer",
+      "name": "Lisa Schneider",
+      "email": "lisa.schneider@bvoberbayern.brk.de"
+    }
+  }
+]
