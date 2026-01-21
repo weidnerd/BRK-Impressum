@@ -194,7 +194,20 @@ class BRK_Facilities_Loader {
         $facilities = $this->get_facilities();
         
         if (is_wp_error($facilities)) {
+            error_log('BRK Impressum: get_facilities_for_select - WP_Error: ' . $facilities->get_error_message());
             return array();
+        }
+        
+        if (!is_array($facilities)) {
+            error_log('BRK Impressum: get_facilities_for_select - Not an array: ' . gettype($facilities));
+            return array();
+        }
+        
+        error_log('BRK Impressum: get_facilities_for_select - Facilities count: ' . count($facilities));
+        
+        if (!empty($facilities)) {
+            // Log erste Facility zur Struktur-Analyse
+            error_log('BRK Impressum: First facility structure: ' . print_r($facilities[0], true));
         }
         
         $options = array();
@@ -202,8 +215,13 @@ class BRK_Facilities_Loader {
         foreach ($facilities as $facility) {
             if (isset($facility['id']) && isset($facility['name'])) {
                 $options[$facility['id']] = $facility['name'];
+            } else {
+                // Log fehlende Felder
+                error_log('BRK Impressum: Facility missing id or name: ' . print_r($facility, true));
             }
         }
+        
+        error_log('BRK Impressum: get_facilities_for_select - Options count: ' . count($options));
         
         // Nach Name sortieren
         asort($options);

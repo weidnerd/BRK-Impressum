@@ -196,6 +196,18 @@ class BRK_Impressum_Admin {
                                             <label for="facility_id">Verband / Einrichtung *</label>
                                         </th>
                                         <td>
+                                            <?php if (empty($facilities)): ?>
+                                                <p class="description" style="color: #d63638;">
+                                                    <strong>⚠️ Keine Verbände gefunden!</strong><br>
+                                                    Bitte prüfen Sie die API-Verbindung oder das Datenformat.
+                                                    <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
+                                                        <br><br>Debug-Modus aktiv - Prüfen Sie das Error-Log für Details.
+                                                    <?php endif; ?>
+                                                </p>
+                                                <button type="button" class="button" id="brk-test-api">
+                                                    🧪 Verbindungstest durchführen
+                                                </button>
+                                            <?php else: ?>
                                             <select name="facility_id" id="facility_id" class="regular-text" required>
                                                 <option value="">-- Bitte wählen --</option>
                                                 <?php foreach ($facilities as $id => $name): ?>
@@ -207,7 +219,11 @@ class BRK_Impressum_Admin {
                                             </select>
                                             <p class="description">
                                                 Wählen Sie Ihren Verband oder Ihre Einrichtung aus.
+                                                <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
+                                                    <br><em>Debug: <?php echo count($facilities); ?> Verbände verfügbar</em>
+                                                <?php endif; ?>
                                             </p>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                     
