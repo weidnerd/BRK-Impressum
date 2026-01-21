@@ -116,7 +116,7 @@ class BRK_Impressum_Admin {
             <div class="brk-impressum-container">
                 <div class="brk-impressum-form-section">
                     <div class="card">
-                        <h2>Impressum-Konfiguration</h2>
+                        <h2>BRK-Impressum-Konfiguration</h2>
                         
                         <form id="brk-impressum-form" method="post">
                             <?php wp_nonce_field('brk_impressum_save', 'brk_impressum_nonce'); ?>
@@ -125,7 +125,8 @@ class BRK_Impressum_Admin {
                                 <tbody>
                                     <tr>
                                         <th scope="row">
-                                            <label for="facility_id">Verband / Einrichtung *</label>
+                                            <label for="facility_id">Verband
+                                                 *</label>
                                         </th>
                                         <td>
                                             <?php if (empty($facilities)): ?>

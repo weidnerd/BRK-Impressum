@@ -96,7 +96,7 @@ class BRK_Impressum_Generator {
             <!-- DEBUG: facility_id=[<?php echo esc_html($facility_id); ?>], comparison=(<?php echo var_export($facility_id !== '000', true); ?>) -->
             <h2>Anbieterkennung nach § 5 TMG</h2>
             
-            <p>Redakteur und Webmaster für die Planung, Realisierung und Betreuung der Internetinhalte sowie für die Administration der Domain <strong><?php echo esc_html($domain); ?></strong> ist:</p>
+            <p>Webmaster für die Administration der Domain <strong><?php echo esc_html($domain); ?></strong> ist:</p>
             
             <?php if (!empty($responsible_name)): ?>
             <p>
