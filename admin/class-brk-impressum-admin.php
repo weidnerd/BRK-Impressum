@@ -169,14 +169,15 @@ class BRK_Impressum_Admin {
                         </button>
                     </p>
                 </div>
-            <?php elseif (empty($facilities)): ?>
-                <div class="notice notice-info">
-                    <p><strong>ℹ️ Info:</strong> Demo-Daten werden verwendet.</p>
-                    <p>Sie können das Plugin normal nutzen. Für Live-Daten stellen Sie sicher, dass die API erreichbar ist.</p>
-                </div>
-            <?php else: ?>
+            <?php elseif (!empty($facilities) && count($facilities) > 2): ?>
                 <div class="notice notice-success" style="border-left-color: #46b450;">
-                    <p><strong>✓ API erfolgreich verbunden!</strong> Es werden Live-Daten verwendet.</p>
+                    <p>
+                        <strong>✓ API erfolgreich verbunden!</strong> 
+                        Es werden <?php echo count($facilities); ?> Live-Verbände geladen.
+                        <button type="button" class="button button-small" id="brk-test-api" style="margin-left: 10px;">
+                            🧪 Verbindung testen
+                        </button>
+                    </p>
                 </div>
             <?php endif; ?>
             
