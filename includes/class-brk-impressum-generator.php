@@ -168,7 +168,7 @@ class BRK_Impressum_Generator {
             <?php if (!empty($gf_funktion) && !empty($gf_name)): ?>
             <p>
                 <strong>Verantwortlich i.S.d. § 5 TMG:</strong><br>
-                <?php echo esc_html($gf_funktion); ?>: <?php echo esc_html($gf_name); ?>
+                <?php echo esc_html($gf_funktion); ?> <?php echo esc_html($gf_name); ?>
                 <?php 
                 $gf_email = $this->loader->get_nested_value($facility, 'geschaeftsfuehrung.email');
                 if (!empty($gf_email)): 
