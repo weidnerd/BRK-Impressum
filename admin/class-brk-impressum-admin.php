@@ -108,25 +108,10 @@ class BRK_Impressum_Admin {
         $settings = BRK_Impressum_Settings::get_instance()->get_settings();
         $loader = BRK_Facilities_Loader::get_instance();
         $facilities = $loader->get_facilities_for_select();
-        $last_error = $loader->get_last_error_info();
         
         ?>
         <div class="wrap brk-impressum-admin">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
-            
-            <?php if ($last_error && is_array($last_error)): ?>
-                <div class="notice notice-warning">
-                    <p><strong>⚠️ Hinweis:</strong> Fallback-Daten werden verwendet, da die Live-API nicht erreichbar ist.</p>
-                    <p>Für technische Details und Fehlerbehebung nutzen Sie bitte die <a href="<?php echo admin_url('tools.php?page=brk-impressum-tools'); ?>">BRK Impressum Tools</a>.</p>
-                </div>
-            <?php elseif (!empty($facilities) && count($facilities) > 2): ?>
-                <div class="notice notice-success" style="border-left-color: #46b450;">
-                    <p>
-                        <strong>✓ API erfolgreich verbunden!</strong> 
-                        Es werden <?php echo count($facilities); ?> Live-Verbände geladen.
-                    </p>
-                </div>
-            <?php endif; ?>
             
             <div class="brk-impressum-container">
                 <div class="brk-impressum-form-section">
@@ -145,9 +130,8 @@ class BRK_Impressum_Admin {
                                         <td>
                                             <?php if (empty($facilities)): ?>
                                                 <p class="description" style="color: #d63638;">
-                                                    <strong>⚠️ Keine Verbände gefunden!</strong><br>
-                                                    Bitte nutzen Sie die <a href="<?php echo admin_url('tools.php?page=brk-impressum-tools'); ?>">BRK Impressum Tools</a> 
-                                                    zur Diagnose und Fehlerbehebung.
+                                                    <strong>⚠️ Keine Verbände verfügbar.</strong><br>
+                                                    Bitte kontaktieren Sie Ihren Administrator.
                                                 </p>
                                             <?php else: ?>
                                             <select name="facility_id" id="facility_id" class="regular-text" required>

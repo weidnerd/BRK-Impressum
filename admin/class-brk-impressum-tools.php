@@ -30,23 +30,24 @@ class BRK_Impressum_Tools {
      * Konstruktor
      */
     private function __construct() {
-        add_action('admin_menu', array($this, 'add_tools_menu'));
-        add_action('network_admin_menu', array($this, 'add_tools_menu'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
-        add_action('admin_init', array($this, 'handle_actions'));
+        // Nur in Multisite und nur im Network-Admin
+        if (is_multisite()) {
+            add_action('network_admin_menu', array($this, 'add_tools_menu'));
+            add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
+            add_action('network_admin_edit_brk_clear_cache', array($this, 'handle_clear_cache'));
+            add_action('network_admin_edit_brk_refresh_cache', array($this, 'handle_refresh_cache'));
+        }
     }
     
     /**
      * Admin-Menü hinzufügen
      */
     public function add_tools_menu() {
-        // Nur für Super-Admins oder Administratoren
-        $capability = is_multisite() ? 'manage_network_options' : 'manage_options';
-        
-        add_management_page(
+        add_submenu_page(
+            'settings.php',
             'BRK Impressum Tools',
             'BRK Impressum',
-            $capability,
+            'manage_network_options',
             'brk-impressum-tools',
             array($this, 'render_tools_page')
         );
@@ -56,7 +57,7 @@ class BRK_Impressum_Tools {
      * Assets laden
      */
     public function enqueue_assets($hook) {
-        if ($hook !== 'tools_page_brk-impressum-tools') {
+        if ($hook !== 'settings_page_brk-impressum-tools') {
             return;
         }
         
@@ -82,56 +83,45 @@ class BRK_Impressum_Tools {
     }
     
     /**
-     * Aktionen verarbeiten
+     * Cache löschen (Network Admin Action)
      */
-    public function handle_actions() {
-        if (!isset($_GET['page']) || $_GET['page'] !== 'brk-impressum-tools') {
-            return;
-        }
+    public function handle_clear_cache() {
+        check_admin_referer('brk_clear_cache');
         
-        $capability = is_multisite() ? 'manage_network_options' : 'manage_options';
-        if (!current_user_can($capability)) {
-            return;
-        }
+        delete_transient('brk_impressum_facilities');
+        delete_transient('brk_impressum_last_error');
         
-        // Cache löschen
-        if (isset($_GET['action']) && $_GET['action'] === 'clear_cache' && 
-            check_admin_referer('brk_clear_cache', 'brk_nonce')) {
-            
-            delete_transient('brk_impressum_facilities');
-            delete_transient('brk_impressum_last_error');
-            
-            wp_safe_redirect(add_query_arg(array(
-                'page' => 'brk-impressum-tools',
-                'message' => 'cache_cleared'
-            ), admin_url('tools.php')));
-            exit;
-        }
+        wp_safe_redirect(add_query_arg(array(
+            'page' => 'brk-impressum-tools',
+            'message' => 'cache_cleared'
+        ), network_admin_url('settings.php')));
+        exit;
+    }
+    
+    /**
+     * Cache neu laden (Network Admin Action)
+     */
+    public function handle_refresh_cache() {
+        check_admin_referer('brk_refresh_cache');
         
-        // Cache neu laden
-        if (isset($_GET['action']) && $_GET['action'] === 'refresh_cache' && 
-            check_admin_referer('brk_refresh_cache', 'brk_nonce')) {
-            
-            delete_transient('brk_impressum_facilities');
-            delete_transient('brk_impressum_last_error');
-            
-            $loader = BRK_Facilities_Loader::get_instance();
-            $loader->refresh_cache();
-            
-            wp_safe_redirect(add_query_arg(array(
-                'page' => 'brk-impressum-tools',
-                'message' => 'cache_refreshed'
-            ), admin_url('tools.php')));
-            exit;
-        }
+        delete_transient('brk_impressum_facilities');
+        delete_transient('brk_impressum_last_error');
+        
+        $loader = BRK_Facilities_Loader::get_instance();
+        $loader->refresh_cache();
+        
+        wp_safe_redirect(add_query_arg(array(
+            'page' => 'brk-impressum-tools',
+            'message' => 'cache_refreshed'
+        ), network_admin_url('settings.php')));
+        exit;
     }
     
     /**
      * Tools-Seite rendern
      */
     public function render_tools_page() {
-        $capability = is_multisite() ? 'manage_network_options' : 'manage_options';
-        if (!current_user_can($capability)) {
+        if (!current_user_can('manage_network_options')) {
             wp_die(__('Sie haben keine Berechtigung, auf diese Seite zuzugreifen.'));
         }
         
@@ -188,11 +178,11 @@ class BRK_Impressum_Tools {
                     </table>
                     
                     <p style="margin-top: 15px;">
-                        <a href="<?php echo wp_nonce_url(add_query_arg(array('page' => 'brk-impressum-tools', 'action' => 'clear_cache'), admin_url('tools.php')), 'brk_clear_cache', 'brk_nonce'); ?>" 
+                        <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_clear_cache'), 'brk_clear_cache'); ?>" 
                            class="button button-secondary">
                             🗑️ Cache löschen
                         </a>
-                        <a href="<?php echo wp_nonce_url(add_query_arg(array('page' => 'brk-impressum-tools', 'action' => 'refresh_cache'), admin_url('tools.php')), 'brk_refresh_cache', 'brk_nonce'); ?>" 
+                        <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_refresh_cache'), 'brk_refresh_cache'); ?>" 
                            class="button button-primary" style="margin-left: 10px;">
                             🔄 Cache neu laden
                         </a>
