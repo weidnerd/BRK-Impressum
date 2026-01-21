@@ -71,6 +71,7 @@ class BRK_Impressum_Generator {
         
         // HTML generieren
         $html = $this->build_impressum_html(
+            $facility_id,
             $facility,
             $landesverband,
             $responsible_name,
@@ -84,7 +85,7 @@ class BRK_Impressum_Generator {
     /**
      * Impressum HTML aufbauen
      */
-    private function build_impressum_html($facility, $landesverband, $responsible_name, $responsible_function, $responsible_email) {
+    private function build_impressum_html($facility_id, $facility, $landesverband, $responsible_name, $responsible_function, $responsible_email) {
         $domain = get_site_url();
         $facility_ebene = $this->loader->get_nested_value($facility, 'ebene', 'Verband');
         $facility_name = $this->loader->get_nested_value($facility, 'name', '');
