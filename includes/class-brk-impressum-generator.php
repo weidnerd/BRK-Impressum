@@ -48,6 +48,9 @@ class BRK_Impressum_Generator {
      * @return string|WP_Error HTML-String des Impressums oder WP_Error
      */
     public function generate_impressum($facility_id, $responsible_name, $responsible_function, $responsible_email) {
+        // Debug-Logging
+        error_log('BRK Impressum: Generating impressum for facility_id: ' . $facility_id);
+        
         // Facility-Daten laden
         $facility = $this->loader->get_facility_by_id($facility_id);
         
