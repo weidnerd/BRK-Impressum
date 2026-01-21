@@ -33,27 +33,6 @@ class BRK_Impressum_Admin {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_action('admin_init', array($this, 'register_settings'));
-        add_action('admin_init', array($this, 'handle_cache_clear'));
-    }
-    
-    /**
-     * Cache löschen wenn URL-Parameter vorhanden
-     */
-    public function handle_cache_clear() {
-        if (isset($_GET['brk_clear_cache']) && $_GET['brk_clear_cache'] === '1' && 
-            isset($_GET['page']) && $_GET['page'] === 'brk-impressum' &&
-            current_user_can('manage_options') &&
-            check_admin_referer('brk_clear_cache', 'brk_nonce')) {
-            
-            delete_transient('brk_impressum_facilities');
-            delete_transient('brk_impressum_last_error');
-            
-            wp_safe_redirect(add_query_arg(array(
-                'page' => 'brk-impressum',
-                'cache_cleared' => '1'
-            ), admin_url('options-general.php')));
-            exit;
-        }
     }
     
     /**
@@ -135,75 +114,16 @@ class BRK_Impressum_Admin {
         <div class="wrap brk-impressum-admin">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             
-            <?php if (isset($_GET['cache_cleared']) && $_GET['cache_cleared'] === '1'): ?>
-                <div class="notice notice-success is-dismissible">
-                    <p><strong>✓ Cache erfolgreich gelöscht!</strong> Die Daten werden jetzt neu von der API geladen.</p>
-                </div>
-            <?php endif; ?>
-            
             <?php if ($last_error && is_array($last_error)): ?>
                 <div class="notice notice-warning">
                     <p><strong>⚠️ Hinweis:</strong> Fallback-Daten werden verwendet, da die Live-API nicht erreichbar ist.</p>
-                    <p><strong>API-URL:</strong> <code><?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?></code></p>
-                    
-                    <details style="margin: 10px 0;">
-                        <summary style="cursor: pointer; font-weight: 600; padding: 5px 0;">🔍 Fehlerdetails anzeigen</summary>
-                        <div style="margin-top: 10px; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;">
-                            <?php if (isset($last_error['error_type'])): ?>
-                                <strong>Fehlertyp:</strong> <?php echo esc_html($last_error['error_type']); ?><br>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($last_error['error_message'])): ?>
-                                <strong>Fehlermeldung:</strong> <?php echo esc_html($last_error['error_message']); ?><br>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($last_error['error_code'])): ?>
-                                <strong>Fehlercode:</strong> <?php echo esc_html($last_error['error_code']); ?><br>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($last_error['http_code'])): ?>
-                                <strong>HTTP Status:</strong> <?php echo esc_html($last_error['http_code']); ?>
-                                <?php if (isset($last_error['http_message'])): ?>
-                                    - <?php echo esc_html($last_error['http_message']); ?>
-                                <?php endif; ?>
-                                <br>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($last_error['timestamp'])): ?>
-                                <strong>Zeitpunkt:</strong> <?php echo esc_html($last_error['timestamp']); ?><br>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($last_error['body_length'])): ?>
-                                <strong>Antwortgröße:</strong> <?php echo esc_html($last_error['body_length']); ?> Bytes<br>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($last_error['response_body_preview']) || isset($last_error['body_preview'])): ?>
-                                <strong>Antwort-Vorschau:</strong><br>
-                                <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 200px; white-space: pre-wrap;"><?php 
-                                    echo esc_html($last_error['response_body_preview'] ?? $last_error['body_preview']); 
-                                ?></pre>
-                            <?php endif; ?>
-                        </div>
-                    </details>
-                    
-                    <p>Die Beispieldaten können für Tests verwendet werden. Für Produktionsdaten kontaktieren Sie bitte den BRK-Support.</p>
-                    <p>
-                        <button type="button" class="button" id="brk-refresh-cache">
-                            🔄 Erneut versuchen
-                        </button>
-                        <button type="button" class="button" id="brk-test-api" style="margin-left: 10px;">
-                            🧪 Verbindungstest durchführen
-                        </button>
-                    </p>
+                    <p>Für technische Details und Fehlerbehebung nutzen Sie bitte die <a href="<?php echo admin_url('tools.php?page=brk-impressum-tools'); ?>">BRK Impressum Tools</a>.</p>
                 </div>
             <?php elseif (!empty($facilities) && count($facilities) > 2): ?>
                 <div class="notice notice-success" style="border-left-color: #46b450;">
                     <p>
                         <strong>✓ API erfolgreich verbunden!</strong> 
                         Es werden <?php echo count($facilities); ?> Live-Verbände geladen.
-                        <button type="button" class="button button-small" id="brk-test-api" style="margin-left: 10px;">
-                            🧪 Verbindung testen
-                        </button>
                     </p>
                 </div>
             <?php endif; ?>
@@ -226,19 +146,9 @@ class BRK_Impressum_Admin {
                                             <?php if (empty($facilities)): ?>
                                                 <p class="description" style="color: #d63638;">
                                                     <strong>⚠️ Keine Verbände gefunden!</strong><br>
-                                                    Bitte prüfen Sie die API-Verbindung oder das Datenformat.
-                                                    <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
-                                                        <br><br>Debug-Modus aktiv - Prüfen Sie das Error-Log für Details.
-                                                    <?php endif; ?>
+                                                    Bitte nutzen Sie die <a href="<?php echo admin_url('tools.php?page=brk-impressum-tools'); ?>">BRK Impressum Tools</a> 
+                                                    zur Diagnose und Fehlerbehebung.
                                                 </p>
-                                                <button type="button" class="button" id="brk-test-api">
-                                                    🧪 Verbindungstest durchführen
-                                                </button>
-                                                <a href="<?php echo wp_nonce_url(add_query_arg(array('page' => 'brk-impressum', 'brk_clear_cache' => '1'), admin_url('options-general.php')), 'brk_clear_cache', 'brk_nonce'); ?>" 
-                                                   class="button" 
-                                                   style="margin-left: 10px;">
-                                                    🗑️ Cache löschen
-                                                </a>
                                             <?php else: ?>
                                             <select name="facility_id" id="facility_id" class="regular-text" required>
                                                 <option value="">-- Bitte wählen --</option>

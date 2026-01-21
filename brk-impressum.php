@@ -59,6 +59,7 @@ class BRK_Impressum {
         require_once BRK_IMPRESSUM_PLUGIN_DIR . 'includes/class-brk-impressum-generator.php';
         require_once BRK_IMPRESSUM_PLUGIN_DIR . 'includes/class-brk-impressum-settings.php';
         require_once BRK_IMPRESSUM_PLUGIN_DIR . 'admin/class-brk-impressum-admin.php';
+        require_once BRK_IMPRESSUM_PLUGIN_DIR . 'admin/class-brk-impressum-tools.php';
     }
     
     /**
@@ -68,6 +69,7 @@ class BRK_Impressum {
         // Admin-Interface initialisieren
         if (is_admin()) {
             BRK_Impressum_Admin::get_instance();
+            BRK_Impressum_Tools::get_instance();
         }
         
         // Activation Hook
