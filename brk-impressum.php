@@ -3,11 +3,9 @@
  * Plugin Name: BRK Impressum Generator
  * Plugin URI: https://github.com/weidnerd/BRK-Impressum
  * Description: Automatische Impressum-Generierung für WordPress Multisite-Unterseiten basierend auf BRK Facilities-Daten
- * Version: 1.0.0
- * Author: BRK
- * Author URI: https://brk.de
- * License: GPL v2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Author: Daniel Weidner, AG IT der Wasserwacht Bayern (+AI)
+ * Author URI: https://minicms.wasserwacht.de/
+ * Version: 0.9.0
  * Network: true
  */
 
