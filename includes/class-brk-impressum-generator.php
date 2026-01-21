@@ -43,11 +43,10 @@ class BRK_Impressum_Generator {
      * 
      * @param string $facility_id Facility-ID
      * @param string $responsible_name Name des Verantwortlichen
-     * @param string $responsible_function Funktion des Verantwortlichen
      * @param string $responsible_email E-Mail des Verantwortlichen
      * @return string|WP_Error HTML-String des Impressums oder WP_Error
      */
-    public function generate_impressum($facility_id, $responsible_name, $responsible_function, $responsible_email) {
+    public function generate_impressum($facility_id, $responsible_name, $responsible_email) {
         // Facility ID IMMER als String behandeln
         $facility_id = strval($facility_id);
         
@@ -71,7 +70,6 @@ class BRK_Impressum_Generator {
             $facility,
             $landesverband,
             $responsible_name,
-            $responsible_function,
             $responsible_email
         );
         
@@ -81,7 +79,7 @@ class BRK_Impressum_Generator {
     /**
      * Impressum HTML aufbauen
      */
-    private function build_impressum_html($facility_id, $facility, $landesverband, $responsible_name, $responsible_function, $responsible_email) {
+    private function build_impressum_html($facility_id, $facility, $landesverband, $responsible_name, $responsible_email) {
         $domain = get_site_url();
         $facility_ebene = $this->loader->get_nested_value($facility, 'ebene', 'Verband');
         $facility_name = $this->loader->get_nested_value($facility, 'name', '');
@@ -90,20 +88,6 @@ class BRK_Impressum_Generator {
         ?>
         <div class="brk-impressum">
             <h2>Anbieterkennung nach § 5 TMG</h2>
-            
-            <p>Webmaster für die Administration der Domain <strong><?php echo esc_html($domain); ?></strong> ist:</p>
-            
-            <?php if (!empty($responsible_name)): ?>
-            <p>
-                <strong><?php echo esc_html($responsible_name); ?></strong><br>
-                <?php if (!empty($responsible_function)): ?>
-                    <?php echo esc_html($responsible_function); ?><br>
-                <?php endif; ?>
-                <?php if (!empty($responsible_email)): ?>
-                    E-Mail: <a href="mailto:<?php echo esc_attr($responsible_email); ?>"><?php echo esc_html($responsible_email); ?></a>
-                <?php endif; ?>
-            </p>
-            <?php endif; ?>
             
             <?php if ($facility_id !== '000'): // Nur bei anderen Verbänden anzeigen, nicht beim Landesverband ?>
             <h3>Angaben zum <?php echo esc_html($facility_ebene); ?>:</h3>
@@ -169,6 +153,16 @@ class BRK_Impressum_Generator {
                 if (!empty($gf_email)): 
                 ?>
                     <br>E-Mail: <a href="mailto:<?php echo esc_attr($gf_email); ?>"><?php echo esc_html($gf_email); ?></a>
+                <?php endif; ?>
+            </p>
+            <?php endif; ?>
+            
+            <?php if (!empty($responsible_name)): ?>
+            <p>
+                <strong>Technischer Kontakt / Webmaster:</strong><br>
+                <?php echo esc_html($responsible_name); ?>
+                <?php if (!empty($responsible_email)): ?>
+                    <br>E-Mail: <a href="mailto:<?php echo esc_attr($responsible_email); ?>"><?php echo esc_html($responsible_email); ?></a>
                 <?php endif; ?>
             </p>
             <?php endif; ?>

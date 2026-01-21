@@ -223,7 +223,6 @@ class BRK_Impressum {
         $html = $generator->generate_impressum(
             $params['facility_id'],
             $params['responsible_name'],
-            $params['responsible_function'],
             $params['responsible_email']
         );
         
@@ -244,7 +243,6 @@ class BRK_Impressum {
         $settings = array(
             'facility_id' => sanitize_text_field($params['facility_id']),
             'responsible_name' => sanitize_text_field($params['responsible_name']),
-            'responsible_function' => sanitize_text_field($params['responsible_function']),
             'responsible_email' => sanitize_email($params['responsible_email']),
             'last_updated' => current_time('mysql')
         );
@@ -273,7 +271,6 @@ class BRK_Impressum {
         $content = $generator->generate_impressum(
             $params['facility_id'],
             $params['responsible_name'],
-            $params['responsible_function'],
             $params['responsible_email']
         );
         
@@ -321,7 +318,6 @@ class BRK_Impressum {
         $html = $generator->generate_impressum(
             $facility_id,
             $settings['responsible_name'],
-            $settings['responsible_function'],
             $settings['responsible_email']
         );
         

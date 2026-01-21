@@ -173,22 +173,6 @@ class BRK_Impressum_Admin {
                                     
                                     <tr>
                                         <th scope="row">
-                                            <label for="responsible_function">Funktion</label>
-                                        </th>
-                                        <td>
-                                            <input type="text" 
-                                                   name="responsible_function" 
-                                                   id="responsible_function" 
-                                                   class="regular-text" 
-                                                   value="<?php echo esc_attr($settings['responsible_function']); ?>">
-                                            <p class="description">
-                                                z.B. "Webmaster", "Pressesprecher"
-                                            </p>
-                                        </td>
-                                    </tr>
-                                    
-                                    <tr>
-                                        <th scope="row">
                                             <label for="responsible_email">E-Mail-Adresse *</label>
                                         </th>
                                         <td>

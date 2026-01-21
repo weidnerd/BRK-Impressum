@@ -50,7 +50,6 @@
             
             const facilityId = $('#facility_id').val();
             const responsibleName = $('#responsible_name').val();
-            const responsibleFunction = $('#responsible_function').val();
             const responsibleEmail = $('#responsible_email').val();
             
             // Validierung
@@ -79,7 +78,6 @@
                 data: JSON.stringify({
                     facility_id: facilityId,
                     responsible_name: responsibleName,
-                    responsible_function: responsibleFunction,
                     responsible_email: responsibleEmail
                 }),
                 success: function(response) {
@@ -107,7 +105,6 @@
             
             const facilityId = $('#facility_id').val();
             const responsibleName = $('#responsible_name').val();
-            const responsibleFunction = $('#responsible_function').val();
             const responsibleEmail = $('#responsible_email').val();
             
             // Validierung
@@ -141,7 +138,6 @@
                 data: JSON.stringify({
                     facility_id: facilityId,
                     responsible_name: responsibleName,
-                    responsible_function: responsibleFunction,
                     responsible_email: responsibleEmail
                 }),
                 success: function(response) {
