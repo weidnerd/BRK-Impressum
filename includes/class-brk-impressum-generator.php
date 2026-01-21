@@ -179,7 +179,6 @@ class BRK_Impressum_Generator {
             <?php endif; ?>
             <?php endif; // Ende der Bedingung für facility_id !== '000' ?>
             
-            <?php if ($facility_id !== '000'): // Landesverband-Block nur bei anderen Verbänden anzeigen ?>
             <h3>Angaben zum Landesverband:</h3>
             
             <p>Das Bayerische Rote Kreuz ist eine Körperschaft des öffentlichen Rechts. Zuständige Aufsichtsbehörde ist das Bayerische Staatsministerium des Inneren.</p>
@@ -235,7 +234,6 @@ class BRK_Impressum_Generator {
                 <?php endif; ?>
             </p>
             <?php endif; ?>
-            <?php endif; // Ende Landesverband-Block ?>
             
             <?php echo $this->get_static_content(); ?>
         </div>
