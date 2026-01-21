@@ -101,6 +101,7 @@ class BRK_Impressum_Generator {
             </p>
             <?php endif; ?>
             
+            <?php if ($facility_id !== '000'): // Nur bei anderen Verbänden anzeigen, nicht beim Landesverband ?>
             <h3>Angaben zum <?php echo esc_html($facility_ebene); ?>:</h3>
             
             <p>
@@ -167,6 +168,7 @@ class BRK_Impressum_Generator {
                 <?php endif; ?>
             </p>
             <?php endif; ?>
+            <?php endif; // Ende der Bedingung für facility_id !== '000' ?>
             
             <h3>Angaben zum Landesverband:</h3>
             
