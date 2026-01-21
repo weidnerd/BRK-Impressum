@@ -138,6 +138,17 @@ class BRK_Facilities_Loader {
             return $this->load_fallback_data($debug_info);
         }
         
+        // Prüfen, ob die Daten verschachtelt sind (Array mit einem Element, das wiederum das Array enthält)
+        if (count($data) === 1 && isset($data[0]) && is_array($data[0])) {
+            // Prüfen ob das erste Element ein Array von Facilities ist
+            $first_item = $data[0];
+            if (is_array($first_item) && isset($first_item[0]) && is_array($first_item[0])) {
+                // Daten sind verschachtelt - inneres Array extrahieren
+                error_log('BRK Impressum: Detected nested array structure, extracting inner array');
+                $data = $first_item;
+            }
+        }
+        
         // Erfolg! Fehler-Transient löschen
         delete_transient('brk_impressum_last_error');
         
@@ -194,20 +205,11 @@ class BRK_Facilities_Loader {
         $facilities = $this->get_facilities();
         
         if (is_wp_error($facilities)) {
-            error_log('BRK Impressum: get_facilities_for_select - WP_Error: ' . $facilities->get_error_message());
             return array();
         }
         
         if (!is_array($facilities)) {
-            error_log('BRK Impressum: get_facilities_for_select - Not an array: ' . gettype($facilities));
             return array();
-        }
-        
-        error_log('BRK Impressum: get_facilities_for_select - Facilities count: ' . count($facilities));
-        
-        if (!empty($facilities)) {
-            // Log erste Facility zur Struktur-Analyse
-            error_log('BRK Impressum: First facility structure: ' . print_r($facilities[0], true));
         }
         
         $options = array();
@@ -215,13 +217,8 @@ class BRK_Facilities_Loader {
         foreach ($facilities as $facility) {
             if (isset($facility['id']) && isset($facility['name'])) {
                 $options[$facility['id']] = $facility['name'];
-            } else {
-                // Log fehlende Felder
-                error_log('BRK Impressum: Facility missing id or name: ' . print_r($facility, true));
             }
         }
-        
-        error_log('BRK Impressum: get_facilities_for_select - Options count: ' . count($options));
         
         // Nach Name sortieren
         asort($options);
