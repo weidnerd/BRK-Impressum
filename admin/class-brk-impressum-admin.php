@@ -194,12 +194,16 @@ class BRK_Impressum_Admin {
                                 <button type="submit" id="brk-save-btn" class="button button-primary">
                                     Impressum übernehmen
                                 </button>
-                                <a href="<?php echo esc_url(home_url('/impressum')); ?>" 
+                                <?php 
+                                $impressum_page = get_page_by_path('impressum');
+                                if ($impressum_page): 
+                                ?>
+                                <a href="<?php echo esc_url(admin_url('post.php?post=' . $impressum_page->ID . '&action=edit')); ?>" 
                                    class="button button-secondary" 
-                                   target="_blank"
                                    style="margin-left: 10px;">
-                                    Impressum-Seite anzeigen
+                                    Impressum-Seite bearbeiten
                                 </a>
+                                <?php endif; ?>
                             </p>
                             
                             <div id="brk-status-message" style="display: none;"></div>
