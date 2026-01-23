@@ -201,7 +201,7 @@ class BRK_Impressum_Admin {
                                 <a href="<?php echo esc_url(admin_url('post.php?post=' . $impressum_page->ID . '&action=edit')); ?>" 
                                    class="button button-secondary" 
                                    style="margin-left: 10px;">
-                                    Impressum-Seite bearbeiten
+                                    Impressum bearbeiten
                                 </a>
                                 <?php endif; ?>
                             </p>
