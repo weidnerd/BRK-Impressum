@@ -146,9 +146,6 @@ class BRK_Impressum_Admin {
                                             </select>
                                             <p class="description">
                                                 Wählen Sie Ihren Verband oder Ihre Einrichtung aus.
-                                                <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
-                                                    <br><em>Debug: <?php echo count($facilities); ?> Verbände verfügbar</em>
-                                                <?php endif; ?>
                                             </p>
                                             <?php endif; ?>
                                         </td>
@@ -197,6 +194,12 @@ class BRK_Impressum_Admin {
                                 <button type="submit" id="brk-save-btn" class="button button-primary">
                                     Impressum übernehmen
                                 </button>
+                                <a href="<?php echo esc_url(home_url('/impressum')); ?>" 
+                                   class="button button-secondary" 
+                                   target="_blank"
+                                   style="margin-left: 10px;">
+                                    Impressum-Seite anzeigen
+                                </a>
                             </p>
                             
                             <div id="brk-status-message" style="display: none;"></div>
