@@ -338,7 +338,46 @@ class BRK_Impressum_Tools {
                 $theme_mods = get_theme_mods();
                 $yootheme_config = get_option('yootheme', array());
                 $customizer = get_option('theme_mods_' . get_option('stylesheet'), array());
+                
+                // Alle Optionen durchsuchen, die mit YooTheme oder Position zu tun haben
+                global $wpdb;
+                $search_patterns = array('%yoo%', '%bottom%', '%footer%', '%widget%', '%builder%', '%module%');
+                $all_options = array();
+                
+                foreach ($search_patterns as $pattern) {
+                    $results = $wpdb->get_results($wpdb->prepare(
+                        "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
+                        $pattern
+                    ), ARRAY_A);
+                    
+                    foreach ($results as $row) {
+                        $all_options[$row['option_name']] = $row['option_value'];
+                    }
+                }
                 ?>
+                
+                <h3>🔍 Alle relevanten Optionen (YooTheme, Bottom, Footer, Widget, Builder):</h3>
+                <details style="margin-bottom: 20px;">
+                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">
+                        <strong>Daten anzeigen (<?php echo count($all_options); ?> Optionen gefunden)</strong>
+                    </summary>
+                    <div style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 600px;">
+                        <?php foreach ($all_options as $option_name => $option_value): ?>
+                            <div style="border-bottom: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                                <strong style="color: #2271b1;"><?php echo esc_html($option_name); ?>:</strong>
+                                <pre style="background: #fff; padding: 5px; margin-top: 5px; white-space: pre-wrap; word-break: break-all;"><?php 
+                                    // Versuche JSON zu dekodieren für bessere Lesbarkeit
+                                    $decoded = @json_decode($option_value, true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                        print_r($decoded);
+                                    } else {
+                                        echo esc_html($option_value);
+                                    }
+                                ?></pre>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </details>
                 
                 <h3>Theme Mods (get_theme_mods):</h3>
                 <details style="margin-bottom: 20px;">
