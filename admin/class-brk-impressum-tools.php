@@ -224,6 +224,12 @@ class BRK_Impressum_Tools {
                 </div>
             </div>
             
+            <!-- Verwendung im Netzwerk -->
+            <div class="card" style="margin-top: 20px;">
+                <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
+                <?php $this->render_network_usage(); ?>
+            </div>
+            
             <!-- Fehlerdiagnose -->
             <?php if ($last_error && is_array($last_error)): ?>
             <div class="card" style="margin-top: 20px; border-left: 4px solid #d63638;">
@@ -298,12 +304,6 @@ class BRK_Impressum_Tools {
                 <?php else: ?>
                 <p>Keine Facilities geladen.</p>
                 <?php endif; ?>
-            </div>
-            
-            <!-- Verwendung im Netzwerk -->
-            <div class="card" style="margin-top: 20px;">
-                <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
-                <?php $this->render_network_usage(); ?>
             </div>
             
             <!-- System-Informationen -->
