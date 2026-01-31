@@ -5,7 +5,7 @@
  * Description: Automatische Impressum-Generierung für WordPress Multisite-Unterseiten basierend auf BRK Facilities-Daten
  * Author: Daniel Weidner, AG IT der Wasserwacht Bayern (+AI)
  * Author URI: https://minicms.wasserwacht.de/
- * Version: 0.9.0
+ * Version: 1.1.0
  * Network: true
  */
 
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin-Konstanten definieren
-define('BRK_IMPRESSUM_VERSION', '1.0.0');
+define('BRK_IMPRESSUM_VERSION', '1.1.0');
 define('BRK_IMPRESSUM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BRK_IMPRESSUM_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BRK_IMPRESSUM_PLUGIN_FILE', __FILE__);
