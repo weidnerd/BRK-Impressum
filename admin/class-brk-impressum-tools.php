@@ -287,7 +287,13 @@ class BRK_Impressum_Tools {
         $expected_url = get_permalink($impressum_page->ID);
         $expected_path = trim(parse_url($expected_url, PHP_URL_PATH), '/');
         
-        // Alle Sidebars durchsuchen
+        // 1. Prüfe YooTheme-Module (für Themes wie "Footer-Widget-LkSG")
+        $yootheme_result = $this->check_yootheme_modules($expected_path);
+        if ($yootheme_result !== null) {
+            return $yootheme_result;
+        }
+        
+        // 2. Alle Standard-WordPress-Sidebars durchsuchen
         $sidebars_widgets = get_option('sidebars_widgets', array());
         
         foreach ($sidebars_widgets as $sidebar_id => $widgets) {
@@ -357,7 +363,7 @@ class BRK_Impressum_Tools {
             }
         }
         
-        // Prüfe auch registrierte Navigationsmenüs
+        // 3. Prüfe auch registrierte Navigationsmenüs
         $nav_menu_locations = get_nav_menu_locations();
         foreach ($nav_menu_locations as $location => $menu_id) {
             $menu_items = wp_get_nav_menu_items($menu_id);
@@ -372,6 +378,88 @@ class BRK_Impressum_Tools {
         }
         
         return 'missing';
+    }
+    
+    /**
+     * Prüfe YooTheme-Module auf Impressum-Links
+     */
+    private function check_yootheme_modules($expected_path) {
+        // YooTheme speichert Module in theme_mods oder als customizer-Einstellung
+        $theme_mods = get_theme_mods();
+        
+        // Durchsuche alle Theme-Einstellungen nach YooTheme-Builder-Daten
+        foreach ($theme_mods as $key => $value) {
+            if (is_string($value) && (strpos($key, 'builder') !== false || strpos($key, 'module') !== false)) {
+                // YooTheme verwendet oft JSON-kodierte Daten
+                $decoded = json_decode($value, true);
+                if (is_array($decoded)) {
+                    $result = $this->search_yootheme_data($decoded, $expected_path);
+                    if ($result !== null) {
+                        return $result;
+                    }
+                }
+            }
+        }
+        
+        // Prüfe auch YooTheme-spezifische Optionen
+        $yootheme_config = get_option('yootheme', array());
+        if (is_array($yootheme_config)) {
+            $result = $this->search_yootheme_data($yootheme_config, $expected_path);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+        
+        // Prüfe theme_json oder customizer-Settings
+        $customizer = get_option('theme_mods_' . get_option('stylesheet'), array());
+        if (is_array($customizer)) {
+            $result = $this->search_yootheme_data($customizer, $expected_path);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Rekursive Suche in YooTheme-Datenstrukturen
+     */
+    private function search_yootheme_data($data, $expected_path) {
+        if (!is_array($data)) {
+            return null;
+        }
+        
+        foreach ($data as $key => $value) {
+            // Suche nach Link-Feldern
+            if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
+                if (stripos($value, 'impressum') !== false) {
+                    $link_path = trim(parse_url($value, PHP_URL_PATH), '/');
+                    return ($link_path === $expected_path) ? 'correct' : 'wrong';
+                }
+            }
+            
+            // Suche nach Content/Text-Feldern die "Impressum" enthalten
+            if (($key === 'content' || $key === 'text' || $key === 'title') && is_string($value)) {
+                if (stripos($value, 'impressum') !== false) {
+                    // Prüfe ob es HTML mit Links ist
+                    $result = $this->check_content_for_impressum_link($value, $expected_path);
+                    if ($result !== null) {
+                        return $result;
+                    }
+                }
+            }
+            
+            // Rekursiv in Arrays/Objekten suchen
+            if (is_array($value)) {
+                $result = $this->search_yootheme_data($value, $expected_path);
+                if ($result !== null) {
+                    return $result;
+                }
+            }
+        }
+        
+        return null;
     }
     
     /**
