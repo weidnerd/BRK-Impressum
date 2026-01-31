@@ -434,17 +434,34 @@ class BRK_Impressum_Tools {
         $expected_url = get_permalink($impressum_page->ID);
         $expected_path = trim(parse_url($expected_url, PHP_URL_PATH), '/');
         
-        // Prüfe YooTheme Builder Widgets
+        // Nur "bottom" Sidebar prüfen
+        $sidebars_widgets = get_option('sidebars_widgets', array());
+        $bottom_widgets = isset($sidebars_widgets['bottom']) ? $sidebars_widgets['bottom'] : array();
+        
+        if (!is_array($bottom_widgets)) {
+            return 'missing';
+        }
+        
+        // Prüfe nur YooTheme Builder Widgets in der "bottom" Sidebar
         $builder_widgets = get_option('widget_builderwidget', array());
         
-        foreach ($builder_widgets as $widget) {
-            if (is_array($widget) && isset($widget['content'])) {
-                // Content ist JSON
-                $decoded = json_decode($widget['content'], true);
-                if (is_array($decoded)) {
-                    $result = $this->search_yootheme_data($decoded, $expected_path);
-                    if ($result !== null) {
-                        return $result;
+        foreach ($bottom_widgets as $widget_id) {
+            if (strpos($widget_id, 'builderwidget-') === 0) {
+                // Extrahiere die Widget-Nummer (z.B. "builderwidget-2" -> 2)
+                $widget_number = (int) str_replace('builderwidget-', '', $widget_id);
+                
+                if (isset($builder_widgets[$widget_number]) && is_array($builder_widgets[$widget_number])) {
+                    $widget = $builder_widgets[$widget_number];
+                    
+                    if (isset($widget['content'])) {
+                        // Content ist JSON
+                        $decoded = json_decode($widget['content'], true);
+                        if (is_array($decoded)) {
+                            $result = $this->search_yootheme_data($decoded, $expected_path);
+                            if ($result !== null) {
+                                return $result;
+                            }
+                        }
                     }
                 }
             }
