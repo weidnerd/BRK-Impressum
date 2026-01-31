@@ -16,6 +16,8 @@ Dieses Plugin ermöglicht es WordPress Multisite-Unterseiten, automatisch ein vo
 - ✅ Live-Vorschau des generierten Impressums
 - ✅ Ein-Klick-Übernahme zur Erstellung/Aktualisierung der Impressum-Seite
 - ✅ Shortcode-Unterstützung `[brk_impressum]`
+- ✅ Footer-Link-Erkennung und automatische Aktualisierung (YooTheme Builder)
+- ✅ Status-Anzeige für Impressum-Link im Footer
 - ✅ Caching für bessere Performance
 - ✅ REST API für flexible Integration
 - ✅ Multisite-ready
@@ -45,6 +47,22 @@ Dieses Plugin ermöglicht es WordPress Multisite-Unterseiten, automatisch ein vo
    - E-Mail-Adresse (Pflichtfeld)
 4. Klicken Sie auf **"Vorschau anzeigen"** um das Impressum zu prüfen
 5. Klicken Sie auf **"Impressum übernehmen"** um die Seite zu erstellen/aktualisieren
+
+### Footer-Link-Verwaltung (YooTheme)
+
+Das Plugin erkennt automatisch Impressum-Links in YooTheme Builder Widgets:
+
+1. **Status-Anzeige**: Zeigt an ob ein korrekter Impressum-Link im Footer vorhanden ist
+   - ✓ Ja - Der Footer-Link zeigt auf das Impressum
+   - ✗ Falsch - Der Footer-Link zeigt auf eine falsche Seite
+   - ✗ Nein - Kein Impressum-Link im Footer gefunden
+
+2. **Automatische Aktualisierung**: Klicken Sie auf "Impressum in Footer übernehmen"
+   - Sucht nach Navigations-Elementen mit dem Text "Impressum"
+   - Aktualisiert nur diesen spezifischen Link auf `/impressum`
+   - Lässt alle anderen Links (Datenschutz, externe Links etc.) unberührt
+
+**Hinweis**: Diese Funktion arbeitet nur mit YooTheme Builder Widgets in der "Bottom"-Sidebar.
 
 ### Impressum anzeigen
 

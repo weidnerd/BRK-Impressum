@@ -63,6 +63,12 @@ Das Plugin ist **sofort einsatzbereit**:
    - Seite wird unter `/impressum` erstellt
    - ✓ Fertig!
 
+8. **Footer-Link aktualisieren (YooTheme)**
+   - Wenn Sie YooTheme verwenden, prüft das Plugin automatisch Ihren Footer
+   - Status wird angezeigt: ✓ Ja / ✗ Nein / ✗ Falsch
+   - Klick auf "Impressum in Footer übernehmen" aktualisiert den Link automatisch
+   - Nur der Link mit "Impressum"-Text wird geändert, andere Links bleiben unberührt
+
 ### API-Verbindung testen
 
 Im Backend unter "Fehlerbehebung":

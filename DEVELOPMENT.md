@@ -43,6 +43,8 @@ brk-impressum/
 - Admin-Interface
 - Asset-Loading
 - Formular-Rendering
+- Footer-Link-Erkennung (YooTheme Builder)
+- AJAX-Handler für Footer-Link-Updates
 
 #### `BRK_Impressum_Settings`
 - Einstellungsverwaltung

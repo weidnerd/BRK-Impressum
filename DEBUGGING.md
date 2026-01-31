@@ -335,5 +335,55 @@ Wenn Sie den BRK-Support kontaktieren, geben Sie bitte an:
 
 ---
 
-**Version:** 1.0.1 mit erweiterter Fehlerdiagnose  
-**Datum:** 21. Januar 2026
+**Version:** 1.1.0 mit erweiterter Fehlerdiagnose und Footer-Link-Features  
+**Datum:** 31. Januar 2026
+
+## 🔗 Footer-Link Debugging (YooTheme)
+
+### Problem: "Kein Impressum-Link im Footer gefunden"
+
+**Schritt 1: Debug-Ansicht öffnen**
+1. Gehen Sie zu **Netzwerkverwaltung > BRK Impressum Tools**
+2. In der Nutzungs-Tabelle: Klick auf "Debug" in der Footer-Link-Spalte
+
+**Schritt 2: Widget-Struktur prüfen**
+Die Debug-Ansicht zeigt:
+- Alle YooTheme Builder Widgets in der Bottom-Sidebar
+- JSON-Inhalt der Widgets
+- Gefundene Link-Strukturen
+- Status der Link-Prüfung
+
+**Schritt 3: Häufige Probleme**
+
+#### Problem: Widget nicht in "bottom" Sidebar
+- **Lösung**: Verschieben Sie das Footer-Widget in die "Bottom"-Sidebar
+- Plugin prüft nur diese Sidebar
+
+#### Problem: Kein Text "Impressum" gefunden
+- **Prüfen**: Hat das Navigations-Element den Text "Impressum"?
+- Plugin sucht in Feldern: `content`, `text`, `title`, `label`
+- **Lösung**: Text muss "Impressum" enthalten (Groß-/Kleinschreibung egal)
+
+#### Problem: Link ist kein YooTheme Builder Widget
+- Plugin arbeitet nur mit `builderwidget` Typ
+- **Lösung**: Erstellen Sie den Footer mit YooTheme Builder
+
+### Browser-Console verwenden
+
+Öffnen Sie die Browser-Console (F12) beim Klick auf "Impressum in Footer übernehmen":
+
+**Erwartete Ausgaben:**
+```javascript
+bindEvents wird ausgeführt
+Footer-Button existiert: 1
+updateFooterLink wurde aufgerufen
+Button: [object Object]
+brkImpressum: {ajaxUrl: "...", nonce: "..."}
+Starte AJAX-Request...
+AJAX Success: {success: true, data: "Footer-Link wurde aktualisiert (1 Link(s) in 1 Widget(s))"}
+```
+
+**Fehlermeldungen interpretieren:**
+- `0 Builder-Widget(s) gefunden` → Widget nicht in bottom Sidebar oder nicht vom Typ builderwidget
+- `1 Builder-Widget(s) gefunden, aber kein Impressum-Link darin` → Link hat keinen "Impressum"-Text oder falsches Feld-Format
+- `Debug: [...]` → Zeigt alle gefundenen Links im Widget

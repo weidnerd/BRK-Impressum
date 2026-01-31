@@ -48,6 +48,25 @@ Geben Sie die Kontaktdaten des Website-Verantwortlichen ein:
 
 #### 3. Vorschau generieren
 - Klicken Sie auf **"Vorschau anzeigen"**
+- Rechts erscheint eine Vorschau des generierten Impressums
+- Prüfen Sie alle Angaben auf Korrektheit
+
+#### 4. Impressum übernehmen
+- Klicken Sie auf **"Impressum übernehmen"**
+- Das Plugin erstellt/aktualisiert die Seite unter `/impressum`
+- Sie sehen eine Erfolgsmeldung mit Link zur Seite
+
+#### 5. Footer-Link aktualisieren (YooTheme)
+Wenn Sie YooTheme verwenden:
+- Das Plugin zeigt automatisch den Status des Impressum-Links im Footer an
+- **✓ Ja**: Der Footer-Link zeigt korrekt auf `/impressum`
+- **✗ Falsch**: Der Link zeigt auf eine andere Seite
+- **✗ Nein**: Kein Impressum-Link wurde gefunden
+- Klicken Sie auf **"Impressum in Footer übernehmen"** um den Link automatisch zu korrigieren
+- Das Plugin aktualisiert nur den Link im Navigations-Element mit dem Text "Impressum"
+- Alle anderen Links (Datenschutz, externe Links etc.) bleiben unverändert
+
+**Hinweis**: Diese Funktion arbeitet nur mit YooTheme Builder Widgets in der "Bottom"-Sidebar.
 - Das Impressum wird rechts im Vorschaubereich angezeigt
 - Prüfen Sie alle Angaben auf Richtigkeit
 

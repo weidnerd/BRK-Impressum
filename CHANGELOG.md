@@ -37,6 +37,27 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Prepared Statements für Datenbankzugriffe
 - XSS-Schutz durch esc_*-Funktionen
 
+## [1.1.0] - 2026-01-31
+
+### Hinzugefügt
+- Footer-Link-Erkennung für YooTheme Builder Widgets
+- Automatische Überprüfung ob Impressum-Link im Footer vorhanden ist
+- Status-Anzeige "Impressum im Footer" (✓ Ja / ✗ Nein / ✗ Falsch)
+- Ein-Klick-Button "Impressum in Footer übernehmen" zum automatischen Aktualisieren
+- Intelligente Link-Erkennung: Aktualisiert nur Links mit "Impressum"-Text
+- Debug-Ansicht in Network Admin Tools für Widget-Analyse
+- Event-Delegation für robustes JavaScript-Event-Handling
+- Cache-Busting mit Zeitstempel für Asset-Versionierung
+
+### Geändert
+- Footer-Link-Status jetzt innerhalb der Konfigurations-Box integriert
+- Verbesserte AJAX-Fehlerbehandlung mit detaillierten Meldungen
+- Optimierte Widget-Suche: Nur Bottom-Sidebar, nur Builder-Widgets
+
+### Behoben
+- PHP Warning bei undefinierter Variable $impressum_page
+- JavaScript Event-Binding-Problem mit Event-Delegation gelöst
+
 ## [Unveröffentlicht]
 
 ### Geplant
