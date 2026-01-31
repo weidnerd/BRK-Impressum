@@ -566,17 +566,6 @@ class BRK_Impressum_Tools {
                 }
             }
             
-            // Suche nach Content/Text-Feldern die "Impressum" enthalten
-            if (($key === 'content' || $key === 'text' || $key === 'title') && is_string($value)) {
-                if (stripos($value, 'impressum') !== false) {
-                    // Prüfe ob es HTML mit Links ist
-                    $result = $this->check_content_for_impressum_link($value, $expected_path);
-                    if ($result !== null) {
-                        return $result;
-                    }
-                }
-            }
-            
             // Rekursiv in Arrays/Objekten suchen
             if (is_array($value)) {
                 $result = $this->search_yootheme_data($value, $expected_path);
