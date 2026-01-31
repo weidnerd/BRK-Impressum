@@ -354,7 +354,6 @@ class BRK_Impressum_Admin {
             wp_send_json_error('Keine Impressum-Seite gefunden');
         }
         
-        $expected_url = get_permalink($impressum_page->ID);
         $expected_path = '/impressum';
         
         // Finde Bottom-Sidebar Widget
@@ -363,24 +362,35 @@ class BRK_Impressum_Admin {
         
         $builder_widgets = get_option('widget_builderwidget', array());
         $updated = false;
+        $found_widgets = 0;
+        $updated_links = 0;
         
         foreach ($bottom_widgets as $widget_id) {
             if (strpos($widget_id, 'builderwidget-') === 0) {
                 $widget_number = (int) str_replace('builderwidget-', '', $widget_id);
                 
                 if (isset($builder_widgets[$widget_number]) && is_array($builder_widgets[$widget_number])) {
-                    $widget = &$builder_widgets[$widget_number];
+                    $found_widgets++;
                     
-                    if (isset($widget['content'])) {
-                        $decoded = json_decode($widget['content'], true);
+                    if (isset($builder_widgets[$widget_number]['content'])) {
+                        $decoded = json_decode($builder_widgets[$widget_number]['content'], true);
                         
                         if (is_array($decoded)) {
+                            // Zähle vorher Links
+                            $count_before = $this->count_impressum_links($decoded);
+                            
                             // Aktualisiere alle "link" Felder die "impressum" enthalten
                             $this->update_impressum_links($decoded, $expected_path);
                             
-                            // Speichere zurück
-                            $widget['content'] = json_encode($decoded);
-                            $updated = true;
+                            // Zähle nachher Links
+                            $count_after = $this->count_impressum_links($decoded);
+                            
+                            if ($count_before > 0) {
+                                // Speichere zurück
+                                $builder_widgets[$widget_number]['content'] = json_encode($decoded);
+                                $updated = true;
+                                $updated_links += $count_before;
+                            }
                         }
                     }
                 }
@@ -389,10 +399,39 @@ class BRK_Impressum_Admin {
         
         if ($updated) {
             update_option('widget_builderwidget', $builder_widgets);
-            wp_send_json_success('Footer-Link wurde aktualisiert');
+            wp_send_json_success("Footer-Link wurde aktualisiert ($updated_links Link(s) in $found_widgets Widget(s))");
         } else {
-            wp_send_json_error('Kein Builder-Widget mit Impressum-Link gefunden');
+            if ($found_widgets > 0) {
+                wp_send_json_error("$found_widgets Builder-Widget(s) gefunden, aber kein Impressum-Link darin");
+            } else {
+                wp_send_json_error('Kein Builder-Widget in der Bottom-Sidebar gefunden');
+            }
         }
+    }
+    
+    /**
+     * Zähle Impressum-Links in Datenstruktur
+     */
+    private function count_impressum_links($data) {
+        if (!is_array($data)) {
+            return 0;
+        }
+        
+        $count = 0;
+        
+        foreach ($data as $key => $value) {
+            if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
+                if (stripos($value, 'impressum') !== false) {
+                    $count++;
+                }
+            }
+            
+            if (is_array($value)) {
+                $count += $this->count_impressum_links($value);
+            }
+        }
+        
+        return $count;
     }
     
     /**
