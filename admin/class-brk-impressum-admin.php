@@ -360,6 +360,7 @@ class BRK_Impressum_Admin {
         $updated = false;
         $found_widgets = 0;
         $updated_links = 0;
+        $debug_info = array();
         
         foreach ($bottom_widgets as $widget_id) {
             if (strpos($widget_id, 'builderwidget-') === 0) {
@@ -374,6 +375,13 @@ class BRK_Impressum_Admin {
                         if (is_array($decoded)) {
                             // Zähle vorher Links
                             $count_before = $this->count_impressum_links($decoded);
+                            
+                            // Debug: Speichere Info über gefundene Struktur
+                            $debug_info[] = array(
+                                'widget_id' => $widget_id,
+                                'links_found' => $count_before,
+                                'structure' => $this->debug_find_links($decoded)
+                            );
                             
                             // Aktualisiere alle "link" Felder die "impressum" enthalten
                             $this->update_impressum_links($decoded, $expected_path);
@@ -398,11 +406,42 @@ class BRK_Impressum_Admin {
             wp_send_json_success("Footer-Link wurde aktualisiert ($updated_links Link(s) in $found_widgets Widget(s))");
         } else {
             if ($found_widgets > 0) {
-                wp_send_json_error("$found_widgets Builder-Widget(s) gefunden, aber kein Impressum-Link darin");
+                // Sende Debug-Info zurück
+                $debug_msg = "$found_widgets Builder-Widget(s) gefunden, aber kein Impressum-Link darin. ";
+                $debug_msg .= "Debug: " . json_encode($debug_info);
+                wp_send_json_error($debug_msg);
             } else {
                 wp_send_json_error('Kein Builder-Widget in der Bottom-Sidebar gefunden');
             }
         }
+    }
+    
+    /**
+     * Debug: Finde alle Links in der Datenstruktur
+     */
+    private function debug_find_links($data, $path = '') {
+        if (!is_array($data)) {
+            return array();
+        }
+        
+        $links = array();
+        
+        foreach ($data as $key => $value) {
+            $current_path = $path ? $path . '.' . $key : $key;
+            
+            if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
+                $links[] = array(
+                    'path' => $current_path,
+                    'value' => $value
+                );
+            }
+            
+            if (is_array($value)) {
+                $links = array_merge($links, $this->debug_find_links($value, $current_path));
+            }
+        }
+        
+        return $links;
     }
     
     /**
