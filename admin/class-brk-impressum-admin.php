@@ -454,13 +454,13 @@ class BRK_Impressum_Admin {
         
         $count = 0;
         
-        foreach ($data as $key => $value) {
-            if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
-                if (stripos($value, 'impressum') !== false) {
-                    $count++;
-                }
-            }
-            
+        // Prüfe ob dieses Element einen Link und "Impressum"-Text hat
+        if ($this->has_impressum_text_and_link($data)) {
+            $count++;
+        }
+        
+        // Rekursiv in Kinder suchen
+        foreach ($data as $value) {
             if (is_array($value)) {
                 $count += $this->count_impressum_links($value);
             }
@@ -477,16 +477,79 @@ class BRK_Impressum_Admin {
             return;
         }
         
-        foreach ($data as $key => &$value) {
-            if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
-                if (stripos($value, 'impressum') !== false) {
+        // Prüfe ob dieses Element einen Link und "Impressum"-Text hat
+        if ($this->has_impressum_text_and_link($data)) {
+            // Aktualisiere den Link in diesem Element
+            foreach ($data as $key => &$value) {
+                if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
                     $value = $new_path;
                 }
             }
-            
+        }
+        
+        // Rekursiv in Kinder suchen
+        foreach ($data as &$value) {
             if (is_array($value)) {
                 $this->update_impressum_links($value, $new_path);
             }
         }
+    }
+    
+    /**
+     * Prüfe ob ein Element sowohl einen Link als auch "Impressum"-Text hat
+     */
+    private function has_impressum_text_and_link($data) {
+        if (!is_array($data)) {
+            return false;
+        }
+        
+        $has_link = false;
+        $has_impressum_text = false;
+        
+        foreach ($data as $key => $value) {
+            // Prüfe auf Link-Feld
+            if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
+                $has_link = true;
+            }
+            
+            // Prüfe auf Text-Felder die "Impressum" enthalten
+            if (($key === 'content' || $key === 'text' || $key === 'title' || $key === 'label') && is_string($value)) {
+                if (stripos($value, 'impressum') !== false) {
+                    $has_impressum_text = true;
+                }
+            }
+        }
+        
+        return $has_link && $has_impressum_text;
+    }
+    
+    /**
+     * Prüfe ob es ein interner Seiten-Link ist (keine externe URL)
+     */
+    private function is_internal_page_link($value) {
+        // Ignoriere externe Links (mit http://, https://, //)
+        if (preg_match('/^(https?:)?\/\//i', $value)) {
+            return false;
+        }
+        
+        // Ignoriere Anker-Links (#) und leere Links
+        if (empty($value) || $value === '#' || strpos($value, '#') === 0) {
+            return false;
+        }
+        
+        // Ignoriere Mail-Links
+        if (strpos($value, 'mailto:') === 0) {
+            return false;
+        }
+        
+        // Ignoriere bereits korrekte Impressum-Links
+        $normalized = trim($value, '/ ');
+        if ($normalized === 'impressum') {
+            return false;
+        }
+        
+        // Alle anderen Links sind vermutlich interne Seiten-Links
+        // z.B. "beispiel-seite/", "/datenschutz", "kontakt"
+        return true;
     }
 }
