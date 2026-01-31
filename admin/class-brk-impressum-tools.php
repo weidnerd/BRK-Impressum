@@ -285,23 +285,20 @@ class BRK_Impressum_Tools {
         }
         
         $expected_url = get_permalink($impressum_page->ID);
-        $expected_path = parse_url($expected_url, PHP_URL_PATH);
+        $expected_path = trim(parse_url($expected_url, PHP_URL_PATH), '/');
         
-        // Alle Sidebars durchsuchen, die "footer" im Namen haben
+        // Alle Sidebars durchsuchen
         $sidebars_widgets = get_option('sidebars_widgets', array());
         
         foreach ($sidebars_widgets as $sidebar_id => $widgets) {
-            if (strpos(strtolower($sidebar_id), 'footer') === false) {
-                continue;
-            }
-            
+            // Alle Sidebars prüfen (nicht nur Footer)
             if (!is_array($widgets)) {
                 continue;
             }
             
             // Alle Widgets in dieser Sidebar durchsuchen
             foreach ($widgets as $widget_id) {
-                // Text Widget, Custom HTML Widget, Nav Menu Widget prüfen
+                // Text Widget
                 if (strpos($widget_id, 'text') === 0) {
                     $text_widgets = get_option('widget_text', array());
                     foreach ($text_widgets as $widget) {
@@ -312,7 +309,10 @@ class BRK_Impressum_Tools {
                             }
                         }
                     }
-                } elseif (strpos($widget_id, 'custom_html') === 0) {
+                }
+                
+                // Custom HTML Widget
+                if (strpos($widget_id, 'custom_html') === 0) {
                     $html_widgets = get_option('widget_custom_html', array());
                     foreach ($html_widgets as $widget) {
                         if (is_array($widget) && isset($widget['content'])) {
@@ -322,7 +322,23 @@ class BRK_Impressum_Tools {
                             }
                         }
                     }
-                } elseif (strpos($widget_id, 'nav_menu') === 0) {
+                }
+                
+                // Block Widget (Gutenberg)
+                if (strpos($widget_id, 'block') === 0) {
+                    $block_widgets = get_option('widget_block', array());
+                    foreach ($block_widgets as $widget) {
+                        if (is_array($widget) && isset($widget['content'])) {
+                            $result = $this->check_content_for_impressum_link($widget['content'], $expected_path);
+                            if ($result !== null) {
+                                return $result;
+                            }
+                        }
+                    }
+                }
+                
+                // Navigation Menu Widget
+                if (strpos($widget_id, 'nav_menu') === 0) {
                     $nav_widgets = get_option('widget_nav_menu', array());
                     foreach ($nav_widgets as $widget) {
                         if (is_array($widget) && isset($widget['nav_menu'])) {
@@ -330,12 +346,26 @@ class BRK_Impressum_Tools {
                             if ($menu_items) {
                                 foreach ($menu_items as $item) {
                                     if (stripos($item->title, 'impressum') !== false) {
-                                        $item_path = parse_url($item->url, PHP_URL_PATH);
+                                        $item_path = trim(parse_url($item->url, PHP_URL_PATH), '/');
                                         return ($item_path === $expected_path) ? 'correct' : 'wrong';
                                     }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+        
+        // Prüfe auch registrierte Navigationsmenüs
+        $nav_menu_locations = get_nav_menu_locations();
+        foreach ($nav_menu_locations as $location => $menu_id) {
+            $menu_items = wp_get_nav_menu_items($menu_id);
+            if ($menu_items) {
+                foreach ($menu_items as $item) {
+                    if (stripos($item->title, 'impressum') !== false) {
+                        $item_path = trim(parse_url($item->url, PHP_URL_PATH), '/');
+                        return ($item_path === $expected_path) ? 'correct' : 'wrong';
                     }
                 }
             }
@@ -348,14 +378,28 @@ class BRK_Impressum_Tools {
      * Prüfe HTML-Content auf Impressum-Link
      */
     private function check_content_for_impressum_link($content, $expected_path) {
-        // Suche nach Links mit "Impressum" im Text
-        if (preg_match_all('/<a[^>]+href=["\']([^"\']+)["\'][^>]*>([^<]*)<\/a>/i', $content, $matches)) {
+        // Suche nach Links mit "Impressum" im Text oder href
+        if (preg_match_all('/<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/is', $content, $matches)) {
             for ($i = 0; $i < count($matches[0]); $i++) {
-                $link_text = $matches[2][$i];
+                $link_text = strip_tags($matches[2][$i]);
                 $link_href = $matches[1][$i];
                 
+                // Prüfe ob "Impressum" im Link-Text vorkommt
                 if (stripos($link_text, 'impressum') !== false) {
-                    $link_path = parse_url($link_href, PHP_URL_PATH);
+                    // Normalisiere den Pfad
+                    $link_path = trim(parse_url($link_href, PHP_URL_PATH), '/');
+                    
+                    // Vergleiche auch mit Slug
+                    if ($link_path === $expected_path || 
+                        $link_path === 'impressum' || 
+                        stripos($link_href, 'impressum') !== false) {
+                        return ($link_path === $expected_path) ? 'correct' : 'wrong';
+                    }
+                }
+                
+                // Prüfe auch href auf "impressum"
+                if (stripos($link_href, 'impressum') !== false) {
+                    $link_path = trim(parse_url($link_href, PHP_URL_PATH), '/');
                     return ($link_path === $expected_path) ? 'correct' : 'wrong';
                 }
             }
