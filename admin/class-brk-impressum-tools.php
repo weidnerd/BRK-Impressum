@@ -530,111 +530,13 @@ class BRK_Impressum_Tools {
         $expected_url = get_permalink($impressum_page->ID);
         $expected_path = trim(parse_url($expected_url, PHP_URL_PATH), '/');
         
-        // 1. Prüfe YooTheme-Module (für Themes wie "Footer-Widget-LkSG")
-        $yootheme_result = $this->check_yootheme_modules($expected_path);
-        if ($yootheme_result !== null) {
-            return $yootheme_result;
-        }
+        // Prüfe YooTheme Builder Widgets
+        $builder_widgets = get_option('widget_builderwidget', array());
         
-        // 2. Alle Standard-WordPress-Sidebars durchsuchen
-        $sidebars_widgets = get_option('sidebars_widgets', array());
-        
-        foreach ($sidebars_widgets as $sidebar_id => $widgets) {
-            // Alle Sidebars prüfen (nicht nur Footer)
-            if (!is_array($widgets)) {
-                continue;
-            }
-            
-            // Alle Widgets in dieser Sidebar durchsuchen
-            foreach ($widgets as $widget_id) {
-                // Text Widget
-                if (strpos($widget_id, 'text') === 0) {
-                    $text_widgets = get_option('widget_text', array());
-                    foreach ($text_widgets as $widget) {
-                        if (is_array($widget) && isset($widget['text'])) {
-                            $result = $this->check_content_for_impressum_link($widget['text'], $expected_path);
-                            if ($result !== null) {
-                                return $result;
-                            }
-                        }
-                    }
-                }
-                
-                // Custom HTML Widget
-                if (strpos($widget_id, 'custom_html') === 0) {
-                    $html_widgets = get_option('widget_custom_html', array());
-                    foreach ($html_widgets as $widget) {
-                        if (is_array($widget) && isset($widget['content'])) {
-                            $result = $this->check_content_for_impressum_link($widget['content'], $expected_path);
-                            if ($result !== null) {
-                                return $result;
-                            }
-                        }
-                    }
-                }
-                
-                // Block Widget (Gutenberg)
-                if (strpos($widget_id, 'block') === 0) {
-                    $block_widgets = get_option('widget_block', array());
-                    foreach ($block_widgets as $widget) {
-                        if (is_array($widget) && isset($widget['content'])) {
-                            $result = $this->check_content_for_impressum_link($widget['content'], $expected_path);
-                            if ($result !== null) {
-                                return $result;
-                            }
-                        }
-                    }
-                }
-                
-                // Navigation Menu Widget
-                if (strpos($widget_id, 'nav_menu') === 0) {
-                    $nav_widgets = get_option('widget_nav_menu', array());
-                    foreach ($nav_widgets as $widget) {
-                        if (is_array($widget) && isset($widget['nav_menu'])) {
-                            $menu_items = wp_get_nav_menu_items($widget['nav_menu']);
-                            if ($menu_items) {
-                                foreach ($menu_items as $item) {
-                                    if (stripos($item->title, 'impressum') !== false) {
-                                        $item_path = trim(parse_url($item->url, PHP_URL_PATH), '/');
-                                        return ($item_path === $expected_path) ? 'correct' : 'wrong';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        // 3. Prüfe auch registrierte Navigationsmenüs
-        $nav_menu_locations = get_nav_menu_locations();
-        foreach ($nav_menu_locations as $location => $menu_id) {
-            $menu_items = wp_get_nav_menu_items($menu_id);
-            if ($menu_items) {
-                foreach ($menu_items as $item) {
-                    if (stripos($item->title, 'impressum') !== false) {
-                        $item_path = trim(parse_url($item->url, PHP_URL_PATH), '/');
-                        return ($item_path === $expected_path) ? 'correct' : 'wrong';
-                    }
-                }
-            }
-        }
-        
-        return 'missing';
-    }
-    
-    /**
-     * Prüfe YooTheme-Module auf Impressum-Links
-     */
-    private function check_yootheme_modules($expected_path) {
-        // YooTheme speichert Module in theme_mods oder als customizer-Einstellung
-        $theme_mods = get_theme_mods();
-        
-        // Durchsuche alle Theme-Einstellungen nach YooTheme-Builder-Daten
-        foreach ($theme_mods as $key => $value) {
-            if (is_string($value) && (strpos($key, 'builder') !== false || strpos($key, 'module') !== false)) {
-                // YooTheme verwendet oft JSON-kodierte Daten
-                $decoded = json_decode($value, true);
+        foreach ($builder_widgets as $widget) {
+            if (is_array($widget) && isset($widget['content'])) {
+                // Content ist JSON
+                $decoded = json_decode($widget['content'], true);
                 if (is_array($decoded)) {
                     $result = $this->search_yootheme_data($decoded, $expected_path);
                     if ($result !== null) {
@@ -644,25 +546,7 @@ class BRK_Impressum_Tools {
             }
         }
         
-        // Prüfe auch YooTheme-spezifische Optionen
-        $yootheme_config = get_option('yootheme', array());
-        if (is_array($yootheme_config)) {
-            $result = $this->search_yootheme_data($yootheme_config, $expected_path);
-            if ($result !== null) {
-                return $result;
-            }
-        }
-        
-        // Prüfe theme_json oder customizer-Settings
-        $customizer = get_option('theme_mods_' . get_option('stylesheet'), array());
-        if (is_array($customizer)) {
-            $result = $this->search_yootheme_data($customizer, $expected_path);
-            if ($result !== null) {
-                return $result;
-            }
-        }
-        
-        return null;
+        return 'missing';
     }
     
     /**
@@ -698,40 +582,6 @@ class BRK_Impressum_Tools {
                 $result = $this->search_yootheme_data($value, $expected_path);
                 if ($result !== null) {
                     return $result;
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    /**
-     * Prüfe HTML-Content auf Impressum-Link
-     */
-    private function check_content_for_impressum_link($content, $expected_path) {
-        // Suche nach Links mit "Impressum" im Text oder href
-        if (preg_match_all('/<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/is', $content, $matches)) {
-            for ($i = 0; $i < count($matches[0]); $i++) {
-                $link_text = strip_tags($matches[2][$i]);
-                $link_href = $matches[1][$i];
-                
-                // Prüfe ob "Impressum" im Link-Text vorkommt
-                if (stripos($link_text, 'impressum') !== false) {
-                    // Normalisiere den Pfad
-                    $link_path = trim(parse_url($link_href, PHP_URL_PATH), '/');
-                    
-                    // Vergleiche auch mit Slug
-                    if ($link_path === $expected_path || 
-                        $link_path === 'impressum' || 
-                        stripos($link_href, 'impressum') !== false) {
-                        return ($link_path === $expected_path) ? 'correct' : 'wrong';
-                    }
-                }
-                
-                // Prüfe auch href auf "impressum"
-                if (stripos($link_href, 'impressum') !== false) {
-                    $link_path = trim(parse_url($link_href, PHP_URL_PATH), '/');
-                    return ($link_path === $expected_path) ? 'correct' : 'wrong';
                 }
             }
         }
