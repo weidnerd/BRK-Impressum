@@ -224,10 +224,12 @@ class BRK_Impressum_Tools {
                 </div>
             </div>
             
-            <!-- Verwendung im Netzwerk -->
-            <div class="card" style="margin-top: 25px;">
-                <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
-                <?php $this->render_network_usage(); ?>
+            <!-- Verwendung im Netzwerk - Volle Breite -->
+            <div style="margin-top: 25px;">
+                <div class="card">
+                    <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
+                    <?php $this->render_network_usage(); ?>
+                </div>
             </div>
             
             <!-- Fehlerdiagnose -->
