@@ -331,159 +331,63 @@ class BRK_Impressum_Tools {
                 </table>
             </div>
             
-            <!-- YooTheme-Daten -->
+            <!-- YooTheme Builder Widgets -->
             <div class="card" style="margin-top: 20px;">
-                <h2>🎨 YooTheme-Daten</h2>
+                <h2>🎨 YooTheme Builder Widgets</h2>
                 <?php
-                $theme_mods = get_theme_mods();
-                $yootheme_config = get_option('yootheme', array());
-                $customizer = get_option('theme_mods_' . get_option('stylesheet'), array());
-                
-                // Alle Optionen durchsuchen, die mit YooTheme oder Position zu tun haben
-                global $wpdb;
-                $search_patterns = array('%yoo%', '%bottom%', '%footer%', '%widget%', '%builder%', '%module%');
-                $all_options = array();
-                
-                foreach ($search_patterns as $pattern) {
-                    $results = $wpdb->get_results($wpdb->prepare(
-                        "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
-                        $pattern
-                    ), ARRAY_A);
-                    
-                    foreach ($results as $row) {
-                        $all_options[$row['option_name']] = $row['option_value'];
-                    }
-                }
-                ?>
-                
-                <h3>🔍 Alle relevanten Optionen (YooTheme, Bottom, Footer, Widget, Builder):</h3>
-                <details style="margin-bottom: 20px;">
-                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">
-                        <strong>Daten anzeigen (<?php echo count($all_options); ?> Optionen gefunden)</strong>
-                    </summary>
-                    <div style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 600px;">
-                        <?php foreach ($all_options as $option_name => $option_value): ?>
-                            <div style="border-bottom: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
-                                <strong style="color: #2271b1;"><?php echo esc_html($option_name); ?>:</strong>
-                                <pre style="background: #fff; padding: 5px; margin-top: 5px; white-space: pre-wrap; word-break: break-all;"><?php 
-                                    // Versuche JSON zu dekodieren für bessere Lesbarkeit
-                                    $decoded = @json_decode($option_value, true);
-                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                                        print_r($decoded);
-                                    } else {
-                                        echo esc_html($option_value);
-                                    }
-                                ?></pre>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </details>
-                
-                <h3>Theme Mods (get_theme_mods):</h3>
-                <details style="margin-bottom: 20px;">
-                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen (<?php echo count($theme_mods); ?> Einträge)</summary>
-                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
-                        print_r($theme_mods); 
-                    ?></pre>
-                </details>
-                
-                <h3>YooTheme Config (option: 'yootheme'):</h3>
-                <details style="margin-bottom: 20px;">
-                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen</summary>
-                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
-                        print_r($yootheme_config); 
-                    ?></pre>
-                </details>
-                
-                <h3>Customizer Settings:</h3>
-                <details style="margin-bottom: 20px;">
-                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen (<?php echo count($customizer); ?> Einträge)</summary>
-                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
-                        print_r($customizer); 
-                    ?></pre>
-                </details>
-            </div>
-            
-            <!-- Sidebars & Widgets -->
-            <div class="card" style="margin-top: 20px;">
-                <h2>📦 WordPress Sidebars & Widgets</h2>
-                <?php
+                $builder_widgets = get_option('widget_builderwidget', array());
                 $sidebars_widgets = get_option('sidebars_widgets', array());
                 ?>
                 
-                <h3>Registrierte Sidebars:</h3>
-                <details style="margin-bottom: 20px;">
-                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen (<?php echo count($sidebars_widgets); ?> Sidebars)</summary>
-                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
-                        print_r($sidebars_widgets); 
-                    ?></pre>
-                </details>
-                
-                <h3>Text Widgets:</h3>
-                <details style="margin-bottom: 20px;">
-                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen</summary>
-                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
-                        print_r(get_option('widget_text', array())); 
-                    ?></pre>
-                </details>
-                
-                <h3>Custom HTML Widgets:</h3>
-                <details style="margin-bottom: 20px;">
-                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen</summary>
-                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
-                        print_r(get_option('widget_custom_html', array())); 
-                    ?></pre>
-                </details>
-                
-                <h3>Block Widgets:</h3>
-                <details style="margin-bottom: 20px;">
-                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen</summary>
-                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
-                        print_r(get_option('widget_block', array())); 
-                    ?></pre>
-                </details>
-            </div>
-            
-            <!-- Navigationsmenüs -->
-            <div class="card" style="margin-top: 20px;">
-                <h2>🔗 Navigationsmenüs</h2>
-                <?php
-                $nav_menu_locations = get_nav_menu_locations();
-                ?>
-                
-                <h3>Menu Locations:</h3>
+                <h3>Sidebars mit Builder Widgets:</h3>
                 <table class="widefat" style="margin-bottom: 20px;">
                     <thead>
                         <tr>
-                            <th>Location</th>
-                            <th>Menu ID</th>
-                            <th>Menu Items</th>
+                            <th>Sidebar</th>
+                            <th>Widgets</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($nav_menu_locations as $location => $menu_id): ?>
-                        <tr>
-                            <td><code><?php echo esc_html($location); ?></code></td>
-                            <td><?php echo esc_html($menu_id); ?></td>
-                            <td>
-                                <?php
-                                $menu_items = wp_get_nav_menu_items($menu_id);
-                                if ($menu_items) {
-                                    echo '<details><summary>' . count($menu_items) . ' Items</summary>';
-                                    echo '<pre style="margin-top: 10px;">';
-                                    foreach ($menu_items as $item) {
-                                        echo 'ID: ' . $item->ID . ' | Title: ' . esc_html($item->title) . ' | URL: ' . esc_html($item->url) . "\n";
-                                    }
-                                    echo '</pre></details>';
-                                } else {
-                                    echo 'Keine Items';
-                                }
-                                ?>
-                            </td>
-                        </tr>
+                        <?php foreach ($sidebars_widgets as $sidebar_id => $widgets): ?>
+                            <?php if (is_array($widgets)): ?>
+                                <?php foreach ($widgets as $widget_id): ?>
+                                    <?php if (strpos($widget_id, 'builderwidget') === 0): ?>
+                                        <tr>
+                                            <td><code><?php echo esc_html($sidebar_id); ?></code></td>
+                                            <td><code><?php echo esc_html($widget_id); ?></code></td>
+                                        </tr>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                
+                <h3>Builder Widget Daten:</h3>
+                <?php if (empty($builder_widgets)): ?>
+                    <p>Keine Builder Widgets gefunden.</p>
+                <?php else: ?>
+                    <?php foreach ($builder_widgets as $widget_id => $widget): ?>
+                        <?php if (is_array($widget) && isset($widget['content'])): ?>
+                            <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-left: 4px solid #2271b1;">
+                                <h4>Widget #<?php echo esc_html($widget_id); ?>: <?php echo esc_html($widget['title'] ?? 'Ohne Titel'); ?></h4>
+                                <details>
+                                    <summary style="cursor: pointer; padding: 10px; background: #fff; margin-top: 10px;">
+                                        JSON-Content anzeigen
+                                    </summary>
+                                    <pre style="background: #fff; padding: 10px; overflow: auto; max-height: 400px; margin-top: 10px;"><?php 
+                                        $decoded = json_decode($widget['content'], true);
+                                        if (json_last_error() === JSON_ERROR_NONE) {
+                                            print_r($decoded);
+                                        } else {
+                                            echo esc_html($widget['content']);
+                                        }
+                                    ?></pre>
+                                </details>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
             
             <!-- Link-Prüfung Ergebnis -->
