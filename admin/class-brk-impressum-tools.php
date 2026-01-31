@@ -88,7 +88,7 @@ class BRK_Impressum_Tools {
     public function handle_clear_cache() {
         check_admin_referer('brk_clear_cache');
         
-        delete_transient('brk_impressum_facilities');
+        delete_transient('brk_facilities_data');
         delete_transient('brk_impressum_last_error');
         
         wp_safe_redirect(add_query_arg(array(
@@ -104,7 +104,7 @@ class BRK_Impressum_Tools {
     public function handle_refresh_cache() {
         check_admin_referer('brk_refresh_cache');
         
-        delete_transient('brk_impressum_facilities');
+        delete_transient('brk_facilities_data');
         delete_transient('brk_impressum_last_error');
         
         $loader = BRK_Facilities_Loader::get_instance();
@@ -130,7 +130,7 @@ class BRK_Impressum_Tools {
         $last_error = $loader->get_last_error_info();
         
         // Cache-Informationen
-        $cache_data = get_transient('brk_impressum_facilities');
+        $cache_data = get_transient('brk_facilities_data');
         $cache_exists = $cache_data !== false;
         
         ?>
