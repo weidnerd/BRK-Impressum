@@ -63,7 +63,7 @@ class BRK_Impressum_Admin {
             'brk-impressum-admin',
             BRK_IMPRESSUM_PLUGIN_URL . 'assets/css/admin.css',
             array(),
-            BRK_IMPRESSUM_VERSION
+            BRK_IMPRESSUM_VERSION . '.' . time()
         );
         
         // JavaScript
@@ -71,7 +71,7 @@ class BRK_Impressum_Admin {
             'brk-impressum-admin',
             BRK_IMPRESSUM_PLUGIN_URL . 'assets/js/admin.js',
             array('jquery', 'wp-api'),
-            BRK_IMPRESSUM_VERSION,
+            BRK_IMPRESSUM_VERSION . '.' . time(),
             true
         );
         

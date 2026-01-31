@@ -360,15 +360,21 @@
          * Footer-Link aktualisieren
          */
         updateFooterLink: function(e) {
+            console.log('updateFooterLink wurde aufgerufen');
             e.preventDefault();
             
             const $btn = $(e.currentTarget);
             const originalText = $btn.text();
             
+            console.log('Button:', $btn);
+            console.log('brkImpressum:', brkImpressum);
+            
             if (!confirm('Möchten Sie den Impressum-Link im Footer wirklich aktualisieren?')) {
+                console.log('Benutzer hat abgebrochen');
                 return;
             }
             
+            console.log('Starte AJAX-Request...');
             $btn.prop('disabled', true).text('Aktualisiere...');
             
             $.ajax({
@@ -379,6 +385,7 @@
                     nonce: brkImpressum.nonce
                 },
                 success: function(response) {
+                    console.log('AJAX Success:', response);
                     if (response.success) {
                         this.showMessage('success', response.data || 'Footer-Link wurde erfolgreich aktualisiert');
                         setTimeout(function() {
@@ -389,8 +396,9 @@
                         $btn.prop('disabled', false).text(originalText);
                     }
                 }.bind(this),
-                error: function() {
-                    this.showMessage('error', 'Fehler beim Aktualisieren des Footer-Links');
+                error: function(xhr, status, error) {
+                    console.log('AJAX Error:', xhr, status, error);
+                    this.showMessage('error', 'Fehler beim Aktualisieren des Footer-Links: ' + error);
                     $btn.prop('disabled', false).text(originalText);
                 }.bind(this)
             });
