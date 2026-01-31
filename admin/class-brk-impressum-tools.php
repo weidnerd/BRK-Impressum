@@ -277,6 +277,94 @@ class BRK_Impressum_Tools {
     }
     
     /**
+     * Prüfe ob Footer-Widgets einen korrekten Impressum-Link enthalten
+     */
+    private function check_footer_impressum_link($impressum_page) {
+        if (!$impressum_page) {
+            return 'no_page';
+        }
+        
+        $expected_url = get_permalink($impressum_page->ID);
+        $expected_path = parse_url($expected_url, PHP_URL_PATH);
+        
+        // Alle Sidebars durchsuchen, die "footer" im Namen haben
+        $sidebars_widgets = get_option('sidebars_widgets', array());
+        
+        foreach ($sidebars_widgets as $sidebar_id => $widgets) {
+            if (strpos(strtolower($sidebar_id), 'footer') === false) {
+                continue;
+            }
+            
+            if (!is_array($widgets)) {
+                continue;
+            }
+            
+            // Alle Widgets in dieser Sidebar durchsuchen
+            foreach ($widgets as $widget_id) {
+                // Text Widget, Custom HTML Widget, Nav Menu Widget prüfen
+                if (strpos($widget_id, 'text') === 0) {
+                    $text_widgets = get_option('widget_text', array());
+                    foreach ($text_widgets as $widget) {
+                        if (is_array($widget) && isset($widget['text'])) {
+                            $result = $this->check_content_for_impressum_link($widget['text'], $expected_path);
+                            if ($result !== null) {
+                                return $result;
+                            }
+                        }
+                    }
+                } elseif (strpos($widget_id, 'custom_html') === 0) {
+                    $html_widgets = get_option('widget_custom_html', array());
+                    foreach ($html_widgets as $widget) {
+                        if (is_array($widget) && isset($widget['content'])) {
+                            $result = $this->check_content_for_impressum_link($widget['content'], $expected_path);
+                            if ($result !== null) {
+                                return $result;
+                            }
+                        }
+                    }
+                } elseif (strpos($widget_id, 'nav_menu') === 0) {
+                    $nav_widgets = get_option('widget_nav_menu', array());
+                    foreach ($nav_widgets as $widget) {
+                        if (is_array($widget) && isset($widget['nav_menu'])) {
+                            $menu_items = wp_get_nav_menu_items($widget['nav_menu']);
+                            if ($menu_items) {
+                                foreach ($menu_items as $item) {
+                                    if (stripos($item->title, 'impressum') !== false) {
+                                        $item_path = parse_url($item->url, PHP_URL_PATH);
+                                        return ($item_path === $expected_path) ? 'correct' : 'wrong';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return 'missing';
+    }
+    
+    /**
+     * Prüfe HTML-Content auf Impressum-Link
+     */
+    private function check_content_for_impressum_link($content, $expected_path) {
+        // Suche nach Links mit "Impressum" im Text
+        if (preg_match_all('/<a[^>]+href=["\']([^"\']+)["\'][^>]*>([^<]*)<\/a>/i', $content, $matches)) {
+            for ($i = 0; $i < count($matches[0]); $i++) {
+                $link_text = $matches[2][$i];
+                $link_href = $matches[1][$i];
+                
+                if (stripos($link_text, 'impressum') !== false) {
+                    $link_path = parse_url($link_href, PHP_URL_PATH);
+                    return ($link_path === $expected_path) ? 'correct' : 'wrong';
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
      * Netzwerk-Nutzung anzeigen
      */
     private function render_network_usage() {
@@ -301,6 +389,9 @@ class BRK_Impressum_Tools {
             $site_name = get_bloginfo('name');
             $site_url = get_site_url();
             
+            // Prüfe Footer-Widgets auf Impressum-Link
+            $footer_link_status = $this->check_footer_impressum_link($impressum_page);
+            
             $usage_data[] = array(
                 'site_id' => $site->blog_id,
                 'site_name' => $site_name ?: 'Unbenannte Site',
@@ -313,6 +404,7 @@ class BRK_Impressum_Tools {
                 'page_url' => $impressum_page ? get_permalink($impressum_page->ID) : '',
                 'is_configured' => $is_configured,
                 'status' => $is_configured ? 'active' : 'inactive',
+                'footer_link' => $footer_link_status,
             );
             
             restore_current_blog();
@@ -341,6 +433,7 @@ class BRK_Impressum_Tools {
                     <th style="width: 100px;">Facility ID</th>
                     <th>Verantwortlicher</th>
                     <th style="width: 120px;">Impressum-Seite</th>
+                    <th style="width: 100px;">Footer-Link</th>
                     <th style="width: 140px;">Letzte Aktualisierung</th>
                 </tr>
             </thead>
@@ -391,6 +484,17 @@ class BRK_Impressum_Tools {
                             </small>
                         <?php else: ?>
                             <span style="color: #d63638;">✗ Nicht erstellt</span>
+                        <?php endif; ?>
+                    </td>
+                    <td style="text-align: center;">
+                        <?php if ($data['footer_link'] === 'correct'): ?>
+                            <span style="color: #46b450; font-size: 16px;" title="Footer-Link korrekt">✓</span>
+                        <?php elseif ($data['footer_link'] === 'wrong'): ?>
+                            <span style="color: #d63638; font-size: 16px;" title="Footer-Link falsch">✗</span>
+                        <?php elseif ($data['footer_link'] === 'missing'): ?>
+                            <span style="color: #999; font-size: 16px;" title="Kein Impressum-Link">○</span>
+                        <?php else: ?>
+                            <span style="color: #999;">-</span>
                         <?php endif; ?>
                     </td>
                     <td>
