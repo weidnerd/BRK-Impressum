@@ -188,6 +188,26 @@ class BRK_Impressum_Admin {
                                 </tbody>
                             </table>
                             
+                            
+                            <p class="submit">
+                                <button type="button" id="brk-preview-btn" class="button button-secondary">
+                                    Vorschau anzeigen
+                                </button>
+                                <button type="submit" id="brk-save-btn" class="button button-primary">
+                                    Impressum übernehmen
+                                </button>
+                                <?php if ($impressum_page): ?>
+                                <a href="<?php echo esc_url(admin_url('post.php?post=' . $impressum_page->ID . '&action=edit')); ?>" 
+                                   class="button button-secondary" 
+                                   style="margin-left: 10px;">
+                                    Impressum bearbeiten
+                                </a>
+                                <?php endif; ?>
+                            </p>
+                            
+                            <div id="brk-status-message" style="display: none;"></div>
+                        </form>
+
                             <!-- Footer-Link Status -->
                             <?php
                             $impressum_page = get_page_by_path('impressum');
@@ -208,25 +228,7 @@ class BRK_Impressum_Admin {
                                     Impressum in Footer übernehmen
                                 </button>
                             </div>
-                            
-                            <p class="submit">
-                                <button type="button" id="brk-preview-btn" class="button button-secondary">
-                                    Vorschau anzeigen
-                                </button>
-                                <button type="submit" id="brk-save-btn" class="button button-primary">
-                                    Impressum übernehmen
-                                </button>
-                                <?php if ($impressum_page): ?>
-                                <a href="<?php echo esc_url(admin_url('post.php?post=' . $impressum_page->ID . '&action=edit')); ?>" 
-                                   class="button button-secondary" 
-                                   style="margin-left: 10px;">
-                                    Impressum bearbeiten
-                                </a>
-                                <?php endif; ?>
-                            </p>
-                            
-                            <div id="brk-status-message" style="display: none;"></div>
-                        </form>
+
                         
                         <?php if (!empty($settings['last_updated'])): ?>
                             <p class="description">
