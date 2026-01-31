@@ -150,124 +150,84 @@ class BRK_Impressum_Tools {
                 <?php endif; ?>
             <?php endif; ?>
             
-            <div class="brk-tools-grid" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-top: 20px;">
+            <div class="brk-tools-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px;">
                 
-                <div style="display: flex; flex-direction: column; gap: 20px;">
-                    <!-- Cache-Verwaltung -->
-                    <div class="card">
-                        <h2>💾 Cache-Verwaltung</h2>
-                        
-                        <table class="widefat">
-                            <tr>
-                                <th>Cache-Status:</th>
-                                <td>
-                                    <?php if ($cache_exists): ?>
-                                        <span style="color: #46b450;">✓ Aktiv</span>
-                                    <?php else: ?>
-                                        <span style="color: #d63638;">✗ Leer</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Gespeicherte Facilities:</th>
-                                <td><?php echo is_array($cache_data) ? count($cache_data) : 0; ?></td>
-                            </tr>
-                            <tr>
-                                <th>Cache-Dauer:</th>
-                                <td>24 Stunden</td>
-                            </tr>
-                        </table>
-                        
-                        <p style="margin-top: 15px;">
-                            <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_clear_cache'), 'brk_clear_cache'); ?>" 
-                               class="button button-secondary">
-                                🗑️ Cache löschen
-                            </a>
-                            <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_refresh_cache'), 'brk_refresh_cache'); ?>" 
-                               class="button button-primary" style="margin-left: 10px;">
-                                🔄 Cache neu laden
-                            </a>
-                        </p>
-                    </div>
+                <!-- Cache-Verwaltung -->
+                <div class="card">
+                    <h2>💾 Cache-Verwaltung</h2>
                     
-                    <!-- Facilities-Liste -->
-                    <div class="card">
-                        <h2>📋 Geladene Facilities (<?php echo is_array($facilities) ? count($facilities) : 0; ?>)</h2>
-                        
-                        <?php if (is_array($facilities) && !empty($facilities)): ?>
-                        <table class="widefat striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Ebene</th>
-                                    <th>Ort</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach (array_slice($facilities, 0, 20) as $facility): ?>
-                                <tr>
-                                    <td><code><?php echo esc_html($facility['id']); ?></code></td>
-                                    <td><?php echo esc_html($facility['name']); ?></td>
-                                    <td><?php echo esc_html($facility['ebene'] ?? '-'); ?></td>
-                                    <td><?php echo esc_html($facility['anschrift']['ort'] ?? '-'); ?></td>
-                                </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                        <?php if (count($facilities) > 20): ?>
-                        <p style="margin-top: 10px; color: #666;">
-                            <em>Es werden die ersten 20 von <?php echo count($facilities); ?> Einträgen angezeigt.</em>
-                        </p>
-                        <?php endif; ?>
-                        <?php else: ?>
-                        <p>Keine Facilities geladen.</p>
-                        <?php endif; ?>
-                    </div>
+                    <table class="widefat">
+                        <tr>
+                            <th>Cache-Status:</th>
+                            <td>
+                                <?php if ($cache_exists): ?>
+                                    <span style="color: #46b450;">✓ Aktiv</span>
+                                <?php else: ?>
+                                    <span style="color: #d63638;">✗ Leer</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Gespeicherte Facilities:</th>
+                            <td><?php echo is_array($cache_data) ? count($cache_data) : 0; ?></td>
+                        </tr>
+                        <tr>
+                            <th>Cache-Dauer:</th>
+                            <td>24 Stunden</td>
+                        </tr>
+                    </table>
+                    
+                    <p style="margin-top: 15px;">
+                        <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_clear_cache'), 'brk_clear_cache'); ?>" 
+                           class="button button-secondary">
+                            🗑️ Cache löschen
+                        </a>
+                        <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_refresh_cache'), 'brk_refresh_cache'); ?>" 
+                           class="button button-primary" style="margin-left: 10px;">
+                            🔄 Cache neu laden
+                        </a>
+                    </p>
                 </div>
                 
-                <div style="display: flex; flex-direction: column; gap: 20px;">
-                    <!-- API-Status -->
-                    <div class="card">
-                        <h2>🌐 API-Status</h2>
-                        
-                        <table class="widefat">
-                            <tr>
-                                <th>API-URL:</th>
-                                <td><code><?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?></code></td>
-                            </tr>
-                            <tr>
-                                <th>Verbindungsstatus:</th>
-                                <td>
-                                    <?php if (!$last_error): ?>
-                                        <span style="color: #46b450;">✓ Verbunden</span>
-                                    <?php else: ?>
-                                        <span style="color: #d63638;">✗ Fehler</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Geladene Facilities:</th>
-                                <td><?php echo is_array($facilities) ? count($facilities) : 0; ?></td>
-                            </tr>
-                        </table>
-                        
-                        <p style="margin-top: 15px;">
-                            <button type="button" class="button button-primary" id="brk-test-api">
-                                🧪 Verbindungstest durchführen
-                            </button>
-                        </p>
-                        
-                        <div id="brk-test-results" style="margin-top: 15px;"></div>
-                    </div>
+                <!-- API-Status -->
+                <div class="card">
+                    <h2>🌐 API-Status</h2>
                     
-                    <!-- Verwendung im Netzwerk -->
-                    <div class="card">
-                        <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
-                        <?php $this->render_network_usage(); ?>
-                    </div>
+                    <table class="widefat">
+                        <tr>
+                            <th>API-URL:</th>
+                            <td><code><?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?></code></td>
+                        </tr>
+                        <tr>
+                            <th>Verbindungsstatus:</th>
+                            <td>
+                                <?php if (!$last_error): ?>
+                                    <span style="color: #46b450;">✓ Verbunden</span>
+                                <?php else: ?>
+                                    <span style="color: #d63638;">✗ Fehler</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Geladene Facilities:</th>
+                            <td><?php echo is_array($facilities) ? count($facilities) : 0; ?></td>
+                        </tr>
+                    </table>
+                    
+                    <p style="margin-top: 15px;">
+                        <button type="button" class="button button-primary" id="brk-test-api">
+                            🧪 Verbindungstest durchführen
+                        </button>
+                    </p>
+                    
+                    <div id="brk-test-results" style="margin-top: 15px;"></div>
                 </div>
             </div>
+            
+            <!-- Verwendung im Netzwerk -->
+            <div class="card" style="margin-top: 25px;">
+                <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
+                <?php $this->render_network_usage(); ?>
             </div>
             
             <!-- Fehlerdiagnose -->
@@ -360,36 +320,45 @@ class BRK_Impressum_Tools {
             $settings = get_option('brk_impressum_settings');
             $impressum_page = get_page_by_path('impressum');
             
-            if (!empty($settings['facility_id']) || $impressum_page) {
-                $usage_data[] = array(
-                    'site_id' => $site->blog_id,
-                    'site_name' => get_bloginfo('name'),
-                    'site_url' => get_site_url(),
-                    'facility_id' => $settings['facility_id'] ?? '',
-                    'responsible_name' => $settings['responsible_name'] ?? '',
-                    'responsible_email' => $settings['responsible_email'] ?? '',
-                    'last_updated' => $settings['last_updated'] ?? '',
-                    'page_exists' => $impressum_page ? true : false,
-                    'page_url' => $impressum_page ? get_permalink($impressum_page->ID) : '',
-                );
-            }
+            $is_configured = !empty($settings['facility_id']);
+            $has_page = $impressum_page ? true : false;
+            
+            $usage_data[] = array(
+                'site_id' => $site->blog_id,
+                'site_name' => get_bloginfo('name'),
+                'site_url' => get_site_url(),
+                'facility_id' => $settings['facility_id'] ?? '',
+                'responsible_name' => $settings['responsible_name'] ?? '',
+                'responsible_email' => $settings['responsible_email'] ?? '',
+                'last_updated' => $settings['last_updated'] ?? '',
+                'page_exists' => $has_page,
+                'page_url' => $impressum_page ? get_permalink($impressum_page->ID) : '',
+                'is_configured' => $is_configured,
+                'status' => $is_configured ? 'active' : 'inactive',
+            );
             
             restore_current_blog();
         }
         
-        if (empty($usage_data)) {
-            echo '<p style="color: #666; font-style: italic;">Keine Unterseiten verwenden derzeit das BRK Impressum Plugin.</p>';
-            return;
-        }
+        // Sortieren: Aktive zuerst
+        usort($usage_data, function($a, $b) {
+            if ($a['status'] === $b['status']) {
+                return strcmp($a['site_name'], $b['site_name']);
+            }
+            return $a['status'] === 'active' ? -1 : 1;
+        });
+        
+        $active_count = count(array_filter($usage_data, function($d) { return $d['is_configured']; }));
         ?>
         
         <p style="margin-bottom: 15px;">
-            <strong><?php echo count($usage_data); ?> von <?php echo count($sites); ?> Unterseiten</strong> verwenden das Plugin.
+            <strong><?php echo $active_count; ?> von <?php echo count($sites); ?> Unterseiten</strong> verwenden das Plugin.
         </p>
         
         <table class="widefat striped">
             <thead>
                 <tr>
+                    <th>Status</th>
                     <th>Site</th>
                     <th>Facility ID</th>
                     <th>Verantwortlicher</th>
@@ -399,7 +368,14 @@ class BRK_Impressum_Tools {
             </thead>
             <tbody>
                 <?php foreach ($usage_data as $data): ?>
-                <tr>
+                <tr style="<?php echo !$data['is_configured'] ? 'opacity: 0.6;' : ''; ?>">
+                    <td style="text-align: center;">
+                        <?php if ($data['is_configured']): ?>
+                            <span style="color: #46b450; font-size: 18px;" title="Plugin aktiv">✓</span>
+                        <?php else: ?>
+                            <span style="color: #d63638; font-size: 18px;" title="Plugin nicht konfiguriert">○</span>
+                        <?php endif; ?>
+                    </td>
                     <td>
                         <strong><?php echo esc_html($data['site_name']); ?></strong><br>
                         <small style="color: #666;">
