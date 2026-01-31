@@ -134,7 +134,7 @@ class BRK_Impressum_Tools {
         $cache_exists = $cache_data !== false;
         
         ?>
-        <div class="wrap">
+        <div class="wrap" style="max-width: none;">
             <h1>🔧 BRK Impressum Tools</h1>
             <p class="description">Technische Verwaltung für Cache, API-Diagnose und Fehlerbehebung</p>
             
@@ -325,10 +325,14 @@ class BRK_Impressum_Tools {
             $is_configured = !empty($settings['facility_id']);
             $has_page = $impressum_page ? true : false;
             
+            // Site-Info speichern (auch für inaktive Sites)
+            $site_name = get_bloginfo('name');
+            $site_url = get_site_url();
+            
             $usage_data[] = array(
                 'site_id' => $site->blog_id,
-                'site_name' => get_bloginfo('name'),
-                'site_url' => get_site_url(),
+                'site_name' => $site_name ?: 'Unbenannte Site',
+                'site_url' => $site_url ?: home_url(),
                 'facility_id' => $settings['facility_id'] ?? '',
                 'responsible_name' => $settings['responsible_name'] ?? '',
                 'responsible_email' => $settings['responsible_email'] ?? '',
