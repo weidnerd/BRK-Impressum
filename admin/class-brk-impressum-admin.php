@@ -188,6 +188,7 @@ class BRK_Impressum_Admin {
                                 </tbody>
                             </table>
                             
+                            <?php $impressum_page = get_page_by_path('impressum'); ?>
                             
                             <p class="submit">
                                 <button type="button" id="brk-preview-btn" class="button button-secondary">
@@ -210,7 +211,6 @@ class BRK_Impressum_Admin {
 
                             <!-- Footer-Link Status -->
                             <?php
-                            $impressum_page = get_page_by_path('impressum');
                             $footer_link_status = $this->check_footer_link($impressum_page);
                             ?>
                             <div style="padding: 15px; margin: 20px 0; background: #f0f0f1; border-left: 4px solid #72aee6; border-radius: 3px;">
