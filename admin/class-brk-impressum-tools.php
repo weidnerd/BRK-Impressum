@@ -227,7 +227,7 @@ class BRK_Impressum_Tools {
             </div><!-- Ende 2-spaltiger Bereich -->
             
             <!-- Einspaltiger Bereich: Plugin-Verwendung im Netzwerk -->
-            <div class="card" style="margin-top: 25px; width: 100%; clear: both; box-sizing: border-box;">
+            <div class="card" style="margin-top: 25px; width: 100% !important; max-width: none !important; clear: both; box-sizing: border-box;">
                 <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
                 <?php $this->render_network_usage(); ?>
             </div>
