@@ -333,15 +333,15 @@ class BRK_Impressum_Tools {
             <strong><?php echo $active_count; ?> von <?php echo count($sites); ?> Unterseiten</strong> verwenden das Plugin.
         </p>
         
-        <table class="widefat striped">
+        <table class="widefat striped" style="width: 100%; table-layout: auto;">
             <thead>
                 <tr>
-                    <th>Status</th>
+                    <th style="width: 60px;">Status</th>
                     <th>Site</th>
-                    <th>Facility ID</th>
+                    <th style="width: 100px;">Facility ID</th>
                     <th>Verantwortlicher</th>
-                    <th>Impressum-Seite</th>
-                    <th>Letzte Aktualisierung</th>
+                    <th style="width: 120px;">Impressum-Seite</th>
+                    <th style="width: 140px;">Letzte Aktualisierung</th>
                 </tr>
             </thead>
             <tbody>
