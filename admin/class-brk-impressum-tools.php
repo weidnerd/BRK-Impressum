@@ -125,6 +125,12 @@ class BRK_Impressum_Tools {
             wp_die(__('Sie haben keine Berechtigung, auf diese Seite zuzugreifen.'));
         }
         
+        // Debug-Ansicht für spezifische Site
+        if (isset($_GET['debug_site'])) {
+            $this->render_debug_view(intval($_GET['debug_site']));
+            return;
+        }
+        
         $loader = BRK_Facilities_Loader::get_instance();
         $facilities = $loader->get_facilities();
         $last_error = $loader->get_last_error_info();
@@ -274,6 +280,204 @@ class BRK_Impressum_Tools {
             <?php endif; ?>
         </div>
         <?php
+    }
+    
+    /**
+     * Debug-Ansicht für eine spezifische Site
+     */
+    private function render_debug_view($site_id) {
+        $site = get_site($site_id);
+        if (!$site) {
+            echo '<div class="wrap"><h1>Site nicht gefunden</h1></div>';
+            return;
+        }
+        
+        switch_to_blog($site_id);
+        
+        $settings = get_option('brk_impressum_settings');
+        $impressum_page = get_page_by_path('impressum');
+        $expected_url = $impressum_page ? get_permalink($impressum_page->ID) : '';
+        $expected_path = $expected_url ? trim(parse_url($expected_url, PHP_URL_PATH), '/') : '';
+        
+        ?>
+        <div class="wrap" style="max-width: none;">
+            <h1>🐛 Debug: <?php echo esc_html(get_bloginfo('name')); ?></h1>
+            <p>
+                <a href="<?php echo esc_url(network_admin_url('settings.php?page=brk-impressum-tools')); ?>" class="button">
+                    ← Zurück zur Übersicht
+                </a>
+            </p>
+            
+            <!-- Erwartete Daten -->
+            <div class="card" style="margin-top: 20px;">
+                <h2>📋 Erwartete Daten</h2>
+                <table class="widefat">
+                    <tr>
+                        <th style="width: 250px;">Site URL:</th>
+                        <td><code><?php echo esc_html(get_site_url()); ?></code></td>
+                    </tr>
+                    <tr>
+                        <th>Impressum-Seite existiert:</th>
+                        <td><?php echo $impressum_page ? '✓ Ja (ID: ' . $impressum_page->ID . ')' : '✗ Nein'; ?></td>
+                    </tr>
+                    <tr>
+                        <th>Erwartete URL:</th>
+                        <td><code><?php echo esc_html($expected_url); ?></code></td>
+                    </tr>
+                    <tr>
+                        <th>Erwarteter Pfad (normalisiert):</th>
+                        <td><code><?php echo esc_html($expected_path); ?></code></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- YooTheme-Daten -->
+            <div class="card" style="margin-top: 20px;">
+                <h2>🎨 YooTheme-Daten</h2>
+                <?php
+                $theme_mods = get_theme_mods();
+                $yootheme_config = get_option('yootheme', array());
+                $customizer = get_option('theme_mods_' . get_option('stylesheet'), array());
+                ?>
+                
+                <h3>Theme Mods (get_theme_mods):</h3>
+                <details style="margin-bottom: 20px;">
+                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen (<?php echo count($theme_mods); ?> Einträge)</summary>
+                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
+                        print_r($theme_mods); 
+                    ?></pre>
+                </details>
+                
+                <h3>YooTheme Config (option: 'yootheme'):</h3>
+                <details style="margin-bottom: 20px;">
+                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen</summary>
+                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
+                        print_r($yootheme_config); 
+                    ?></pre>
+                </details>
+                
+                <h3>Customizer Settings:</h3>
+                <details style="margin-bottom: 20px;">
+                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen (<?php echo count($customizer); ?> Einträge)</summary>
+                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
+                        print_r($customizer); 
+                    ?></pre>
+                </details>
+            </div>
+            
+            <!-- Sidebars & Widgets -->
+            <div class="card" style="margin-top: 20px;">
+                <h2>📦 WordPress Sidebars & Widgets</h2>
+                <?php
+                $sidebars_widgets = get_option('sidebars_widgets', array());
+                ?>
+                
+                <h3>Registrierte Sidebars:</h3>
+                <details style="margin-bottom: 20px;">
+                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen (<?php echo count($sidebars_widgets); ?> Sidebars)</summary>
+                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
+                        print_r($sidebars_widgets); 
+                    ?></pre>
+                </details>
+                
+                <h3>Text Widgets:</h3>
+                <details style="margin-bottom: 20px;">
+                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen</summary>
+                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
+                        print_r(get_option('widget_text', array())); 
+                    ?></pre>
+                </details>
+                
+                <h3>Custom HTML Widgets:</h3>
+                <details style="margin-bottom: 20px;">
+                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen</summary>
+                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
+                        print_r(get_option('widget_custom_html', array())); 
+                    ?></pre>
+                </details>
+                
+                <h3>Block Widgets:</h3>
+                <details style="margin-bottom: 20px;">
+                    <summary style="cursor: pointer; padding: 10px; background: #f0f0f0;">Daten anzeigen</summary>
+                    <pre style="background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px;"><?php 
+                        print_r(get_option('widget_block', array())); 
+                    ?></pre>
+                </details>
+            </div>
+            
+            <!-- Navigationsmenüs -->
+            <div class="card" style="margin-top: 20px;">
+                <h2>🔗 Navigationsmenüs</h2>
+                <?php
+                $nav_menu_locations = get_nav_menu_locations();
+                ?>
+                
+                <h3>Menu Locations:</h3>
+                <table class="widefat" style="margin-bottom: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th>Menu ID</th>
+                            <th>Menu Items</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($nav_menu_locations as $location => $menu_id): ?>
+                        <tr>
+                            <td><code><?php echo esc_html($location); ?></code></td>
+                            <td><?php echo esc_html($menu_id); ?></td>
+                            <td>
+                                <?php
+                                $menu_items = wp_get_nav_menu_items($menu_id);
+                                if ($menu_items) {
+                                    echo '<details><summary>' . count($menu_items) . ' Items</summary>';
+                                    echo '<pre style="margin-top: 10px;">';
+                                    foreach ($menu_items as $item) {
+                                        echo 'ID: ' . $item->ID . ' | Title: ' . esc_html($item->title) . ' | URL: ' . esc_html($item->url) . "\n";
+                                    }
+                                    echo '</pre></details>';
+                                } else {
+                                    echo 'Keine Items';
+                                }
+                                ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Link-Prüfung Ergebnis -->
+            <div class="card" style="margin-top: 20px; border-left: 4px solid #2271b1;">
+                <h2>✅ Link-Prüfung Ergebnis</h2>
+                <?php
+                $footer_link_status = $this->check_footer_impressum_link($impressum_page);
+                ?>
+                <table class="widefat">
+                    <tr>
+                        <th style="width: 250px;">Status:</th>
+                        <td>
+                            <strong style="font-size: 16px;">
+                                <?php
+                                if ($footer_link_status === 'correct') {
+                                    echo '<span style="color: #46b450;">✓ CORRECT</span> - Link gefunden und korrekt';
+                                } elseif ($footer_link_status === 'wrong') {
+                                    echo '<span style="color: #d63638;">✗ WRONG</span> - Link gefunden, aber falsche URL';
+                                } elseif ($footer_link_status === 'missing') {
+                                    echo '<span style="color: #999;">○ MISSING</span> - Kein Impressum-Link gefunden';
+                                } else {
+                                    echo '<span style="color: #999;">- NO PAGE</span> - Keine Impressum-Seite';
+                                }
+                                ?>
+                            </strong>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <?php
+        
+        restore_current_blog();
     }
     
     /**
@@ -628,6 +832,13 @@ class BRK_Impressum_Tools {
                         <?php else: ?>
                             <span style="color: #999;">-</span>
                         <?php endif; ?>
+                        <br>
+                        <small>
+                            <a href="<?php echo esc_url(network_admin_url('settings.php?page=brk-impressum-tools&debug_site=' . $data['site_id'])); ?>" 
+                               style="color: #2271b1; text-decoration: none;">
+                                Debug
+                            </a>
+                        </small>
                     </td>
                     <td>
                         <?php if ($data['last_updated']): ?>
