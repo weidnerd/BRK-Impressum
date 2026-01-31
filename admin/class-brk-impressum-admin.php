@@ -33,6 +33,7 @@ class BRK_Impressum_Admin {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('wp_ajax_brk_update_footer_link', array($this, 'ajax_update_footer_link'));
     }
     
     /**
@@ -206,6 +207,28 @@ class BRK_Impressum_Admin {
                                 <?php endif; ?>
                             </p>
                             
+                            <!-- Footer-Link Status -->
+                            <?php
+                            $footer_link_status = $this->check_footer_link($impressum_page);
+                            ?>
+                            <div class="notice notice-info" style="padding: 10px; margin-top: 20px;">
+                                <p style="margin: 5px 0;">
+                                    <strong>Impressum im Footer:</strong>
+                                    <?php if ($footer_link_status === 'correct'): ?>
+                                        <span style="color: #46b450;">✓ Ja</span> - Der Footer-Link zeigt auf das Impressum
+                                    <?php elseif ($footer_link_status === 'wrong'): ?>
+                                        <span style="color: #d63638;">✗ Falsch</span> - Der Footer-Link zeigt auf eine falsche Seite
+                                    <?php else: ?>
+                                        <span style="color: #d63638;">✗ Nein</span> - Kein Impressum-Link im Footer gefunden
+                                    <?php endif; ?>
+                                </p>
+                                <p style="margin: 10px 0 5px;">
+                                    <button type="button" id="brk-update-footer-btn" class="button button-secondary">
+                                        Impressum in Footer übernehmen
+                                    </button>
+                                </p>
+                            </div>
+                            
                             <div id="brk-status-message" style="display: none;"></div>
                         </form>
                         
@@ -242,5 +265,154 @@ class BRK_Impressum_Admin {
             </div>
         </div>
         <?php
+    }
+    
+    /**
+     * Prüfe Footer-Link Status
+     */
+    private function check_footer_link($impressum_page) {
+        if (!$impressum_page) {
+            return 'no_page';
+        }
+        
+        $expected_url = get_permalink($impressum_page->ID);
+        $expected_path = trim(parse_url($expected_url, PHP_URL_PATH), '/');
+        
+        // Nur "bottom" Sidebar prüfen
+        $sidebars_widgets = get_option('sidebars_widgets', array());
+        $bottom_widgets = isset($sidebars_widgets['bottom']) ? $sidebars_widgets['bottom'] : array();
+        
+        if (!is_array($bottom_widgets)) {
+            return 'missing';
+        }
+        
+        // Prüfe YooTheme Builder Widgets
+        $builder_widgets = get_option('widget_builderwidget', array());
+        
+        foreach ($bottom_widgets as $widget_id) {
+            if (strpos($widget_id, 'builderwidget-') === 0) {
+                $widget_number = (int) str_replace('builderwidget-', '', $widget_id);
+                
+                if (isset($builder_widgets[$widget_number]) && is_array($builder_widgets[$widget_number])) {
+                    $widget = $builder_widgets[$widget_number];
+                    
+                    if (isset($widget['content'])) {
+                        $decoded = json_decode($widget['content'], true);
+                        if (is_array($decoded)) {
+                            $result = $this->search_yootheme_data($decoded, $expected_path);
+                            if ($result !== null) {
+                                return $result;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return 'missing';
+    }
+    
+    /**
+     * Rekursive Suche in YooTheme-Datenstrukturen
+     */
+    private function search_yootheme_data($data, $expected_path) {
+        if (!is_array($data)) {
+            return null;
+        }
+        
+        foreach ($data as $key => $value) {
+            if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
+                if (stripos($value, 'impressum') !== false) {
+                    $link_path = trim(parse_url($value, PHP_URL_PATH), '/');
+                    return ($link_path === $expected_path) ? 'correct' : 'wrong';
+                }
+            }
+            
+            if (is_array($value)) {
+                $result = $this->search_yootheme_data($value, $expected_path);
+                if ($result !== null) {
+                    return $result;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * AJAX: Footer-Link aktualisieren
+     */
+    public function ajax_update_footer_link() {
+        check_ajax_referer('brk_impressum_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Keine Berechtigung');
+        }
+        
+        $impressum_page = get_page_by_path('impressum');
+        if (!$impressum_page) {
+            wp_send_json_error('Keine Impressum-Seite gefunden');
+        }
+        
+        $expected_url = get_permalink($impressum_page->ID);
+        $expected_path = '/impressum';
+        
+        // Finde Bottom-Sidebar Widget
+        $sidebars_widgets = get_option('sidebars_widgets', array());
+        $bottom_widgets = isset($sidebars_widgets['bottom']) ? $sidebars_widgets['bottom'] : array();
+        
+        $builder_widgets = get_option('widget_builderwidget', array());
+        $updated = false;
+        
+        foreach ($bottom_widgets as $widget_id) {
+            if (strpos($widget_id, 'builderwidget-') === 0) {
+                $widget_number = (int) str_replace('builderwidget-', '', $widget_id);
+                
+                if (isset($builder_widgets[$widget_number]) && is_array($builder_widgets[$widget_number])) {
+                    $widget = &$builder_widgets[$widget_number];
+                    
+                    if (isset($widget['content'])) {
+                        $decoded = json_decode($widget['content'], true);
+                        
+                        if (is_array($decoded)) {
+                            // Aktualisiere alle "link" Felder die "impressum" enthalten
+                            $this->update_impressum_links($decoded, $expected_path);
+                            
+                            // Speichere zurück
+                            $widget['content'] = json_encode($decoded);
+                            $updated = true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if ($updated) {
+            update_option('widget_builderwidget', $builder_widgets);
+            wp_send_json_success('Footer-Link wurde aktualisiert');
+        } else {
+            wp_send_json_error('Kein Builder-Widget mit Impressum-Link gefunden');
+        }
+    }
+    
+    /**
+     * Rekursiv alle Impressum-Links aktualisieren
+     */
+    private function update_impressum_links(&$data, $new_path) {
+        if (!is_array($data)) {
+            return;
+        }
+        
+        foreach ($data as $key => &$value) {
+            if (($key === 'link' || $key === 'url' || $key === 'href') && is_string($value)) {
+                if (stripos($value, 'impressum') !== false) {
+                    $value = $new_path;
+                }
+            }
+            
+            if (is_array($value)) {
+                $this->update_impressum_links($value, $new_path);
+            }
+        }
     }
 }

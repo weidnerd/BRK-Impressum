@@ -21,6 +21,7 @@
         bindEvents: function() {
             $('#brk-preview-btn').on('click', this.showPreview.bind(this));
             $('#brk-save-btn').on('click', this.saveImpressum.bind(this));
+            $('#brk-update-footer-btn').on('click', this.updateFooterLink.bind(this));
             $('#brk-refresh-cache').on('click', this.refreshCache.bind(this));
             $('#brk-test-api').on('click', this.testApiConnection.bind(this));
             $('#brk-impressum-form').on('submit', this.handleFormSubmit.bind(this));
@@ -353,6 +354,46 @@
             if (typeof $.fn.tooltip !== 'undefined') {
                 $('.description').tooltip();
             }
+        },
+        
+        /**
+         * Footer-Link aktualisieren
+         */
+        updateFooterLink: function(e) {
+            e.preventDefault();
+            
+            const $btn = $(e.currentTarget);
+            const originalText = $btn.text();
+            
+            if (!confirm('Möchten Sie den Impressum-Link im Footer wirklich aktualisieren?')) {
+                return;
+            }
+            
+            $btn.prop('disabled', true).text('Aktualisiere...');
+            
+            $.ajax({
+                url: brkImpressum.ajaxUrl,
+                method: 'POST',
+                data: {
+                    action: 'brk_update_footer_link',
+                    nonce: brkImpressum.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        this.showMessage('success', response.data || 'Footer-Link wurde erfolgreich aktualisiert');
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        this.showMessage('error', response.data || 'Fehler beim Aktualisieren des Footer-Links');
+                        $btn.prop('disabled', false).text(originalText);
+                    }
+                }.bind(this),
+                error: function() {
+                    this.showMessage('error', 'Fehler beim Aktualisieren des Footer-Links');
+                    $btn.prop('disabled', false).text(originalText);
+                }.bind(this)
+            });
         }
     };
     
