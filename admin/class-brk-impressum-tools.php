@@ -152,82 +152,87 @@ class BRK_Impressum_Tools {
             
             <div class="brk-tools-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                 
-                <!-- Cache-Verwaltung -->
-                <div class="card">
-                    <h2>💾 Cache-Verwaltung</h2>
-                    
-                    <table class="widefat">
-                        <tr>
-                            <th>Cache-Status:</th>
-                            <td>
-                                <?php if ($cache_exists): ?>
-                                    <span style="color: #46b450;">✓ Aktiv</span>
-                                <?php else: ?>
-                                    <span style="color: #d63638;">✗ Leer</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Gespeicherte Facilities:</th>
-                            <td><?php echo is_array($cache_data) ? count($cache_data) : 0; ?></td>
-                        </tr>
-                        <tr>
-                            <th>Cache-Dauer:</th>
-                            <td>24 Stunden</td>
-                        </tr>
-                    </table>
-                    
-                    <p style="margin-top: 15px;">
-                        <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_clear_cache'), 'brk_clear_cache'); ?>" 
-                           class="button button-secondary">
-                            🗑️ Cache löschen
-                        </a>
-                        <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_refresh_cache'), 'brk_refresh_cache'); ?>" 
-                           class="button button-primary" style="margin-left: 10px;">
-                            🔄 Cache neu laden
-                        </a>
-                    </p>
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- Cache-Verwaltung -->
+                    <div class="card">
+                        <h2>💾 Cache-Verwaltung</h2>
+                        
+                        <table class="widefat">
+                            <tr>
+                                <th>Cache-Status:</th>
+                                <td>
+                                    <?php if ($cache_exists): ?>
+                                        <span style="color: #46b450;">✓ Aktiv</span>
+                                    <?php else: ?>
+                                        <span style="color: #d63638;">✗ Leer</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Gespeicherte Facilities:</th>
+                                <td><?php echo is_array($cache_data) ? count($cache_data) : 0; ?></td>
+                            </tr>
+                            <tr>
+                                <th>Cache-Dauer:</th>
+                                <td>24 Stunden</td>
+                            </tr>
+                        </table>
+                        
+                        <p style="margin-top: 15px;">
+                            <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_clear_cache'), 'brk_clear_cache'); ?>" 
+                               class="button button-secondary">
+                                🗑️ Cache löschen
+                            </a>
+                            <a href="<?php echo wp_nonce_url(network_admin_url('edit.php?action=brk_refresh_cache'), 'brk_refresh_cache'); ?>" 
+                               class="button button-primary" style="margin-left: 10px;">
+                                🔄 Cache neu laden
+                            </a>
+                        </p>
+                    </div>
                 </div>
                 
-                <!-- API-Status -->
-                <div class="card">
-                    <h2>🌐 API-Status</h2>
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <!-- API-Status -->
+                    <div class="card">
+                        <h2>🌐 API-Status</h2>
+                        
+                        <table class="widefat">
+                            <tr>
+                                <th>API-URL:</th>
+                                <td><code><?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?></code></td>
+                            </tr>
+                            <tr>
+                                <th>Verbindungsstatus:</th>
+                                <td>
+                                    <?php if (!$last_error): ?>
+                                        <span style="color: #46b450;">✓ Verbunden</span>
+                                    <?php else: ?>
+                                        <span style="color: #d63638;">✗ Fehler</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Geladene Facilities:</th>
+                                <td><?php echo is_array($facilities) ? count($facilities) : 0; ?></td>
+                            </tr>
+                        </table>
+                        
+                        <p style="margin-top: 15px;">
+                            <button type="button" class="button button-primary" id="brk-test-api">
+                                🧪 Verbindungstest durchführen
+                            </button>
+                        </p>
+                        
+                        <div id="brk-test-results" style="margin-top: 15px;"></div>
+                    </div>
                     
-                    <table class="widefat">
-                        <tr>
-                            <th>API-URL:</th>
-                            <td><code><?php echo esc_html(BRK_IMPRESSUM_FACILITIES_URL); ?></code></td>
-                        </tr>
-                        <tr>
-                            <th>Verbindungsstatus:</th>
-                            <td>
-                                <?php if (!$last_error): ?>
-                                    <span style="color: #46b450;">✓ Verbunden</span>
-                                <?php else: ?>
-                                    <span style="color: #d63638;">✗ Fehler</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Geladene Facilities:</th>
-                            <td><?php echo is_array($facilities) ? count($facilities) : 0; ?></td>
-                        </tr>
-                    </table>
-                    
-                    <p style="margin-top: 15px;">
-                        <button type="button" class="button button-primary" id="brk-test-api">
-                            🧪 Verbindungstest durchführen
-                        </button>
-                    </p>
-                    
-                    <div id="brk-test-results" style="margin-top: 15px;"></div>
+                    <!-- Verwendung im Netzwerk -->
+                    <div class="card">
+                        <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
+                        <?php $this->render_network_usage(); ?>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Verwendung im Netzwerk -->
-            <div class="card" style="margin-top: 20px;">
-                <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
-                <?php $this->render_network_usage(); ?>
             </div>
             
             <!-- Fehlerdiagnose -->
