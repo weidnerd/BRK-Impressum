@@ -300,6 +300,12 @@ class BRK_Impressum_Tools {
                 <?php endif; ?>
             </div>
             
+            <!-- Verwendung im Netzwerk -->
+            <div class="card" style="margin-top: 20px;">
+                <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
+                <?php $this->render_network_usage(); ?>
+            </div>
+            
             <!-- System-Informationen -->
             <div class="card" style="margin-top: 20px;">
                 <h2>ℹ️ System-Informationen</h2>
@@ -328,6 +334,125 @@ class BRK_Impressum_Tools {
                 </table>
             </div>
         </div>
+        <?php
+    }
+    
+    /**
+     * Netzwerk-Nutzung anzeigen
+     */
+    private function render_network_usage() {
+        if (!is_multisite()) {
+            echo '<p>Dieses Feature ist nur in Multisite-Installationen verfügbar.</p>';
+            return;
+        }
+        
+        $sites = get_sites(array('number' => 1000));
+        $usage_data = array();
+        
+        foreach ($sites as $site) {
+            switch_to_blog($site->blog_id);
+            
+            $settings = get_option('brk_impressum_settings');
+            $impressum_page = get_page_by_path('impressum');
+            
+            if (!empty($settings['facility_id']) || $impressum_page) {
+                $usage_data[] = array(
+                    'site_id' => $site->blog_id,
+                    'site_name' => get_bloginfo('name'),
+                    'site_url' => get_site_url(),
+                    'facility_id' => $settings['facility_id'] ?? '',
+                    'responsible_name' => $settings['responsible_name'] ?? '',
+                    'responsible_email' => $settings['responsible_email'] ?? '',
+                    'last_updated' => $settings['last_updated'] ?? '',
+                    'page_exists' => $impressum_page ? true : false,
+                    'page_url' => $impressum_page ? get_permalink($impressum_page->ID) : '',
+                );
+            }
+            
+            restore_current_blog();
+        }
+        
+        if (empty($usage_data)) {
+            echo '<p style="color: #666; font-style: italic;">Keine Unterseiten verwenden derzeit das BRK Impressum Plugin.</p>';
+            return;
+        }
+        ?>
+        
+        <p style="margin-bottom: 15px;">
+            <strong><?php echo count($usage_data); ?> von <?php echo count($sites); ?> Unterseiten</strong> verwenden das Plugin.
+        </p>
+        
+        <table class="widefat striped">
+            <thead>
+                <tr>
+                    <th>Site</th>
+                    <th>Facility ID</th>
+                    <th>Verantwortlicher</th>
+                    <th>Impressum-Seite</th>
+                    <th>Letzte Aktualisierung</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($usage_data as $data): ?>
+                <tr>
+                    <td>
+                        <strong><?php echo esc_html($data['site_name']); ?></strong><br>
+                        <small style="color: #666;">
+                            <a href="<?php echo esc_url($data['site_url']); ?>" target="_blank">
+                                <?php echo esc_html(str_replace(array('http://', 'https://'), '', $data['site_url'])); ?>
+                            </a>
+                        </small>
+                    </td>
+                    <td>
+                        <?php if ($data['facility_id']): ?>
+                            <code><?php echo esc_html($data['facility_id']); ?></code>
+                        <?php else: ?>
+                            <span style="color: #999;">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if ($data['responsible_name']): ?>
+                            <?php echo esc_html($data['responsible_name']); ?><br>
+                            <?php if ($data['responsible_email']): ?>
+                                <small style="color: #666;">
+                                    <a href="mailto:<?php echo esc_attr($data['responsible_email']); ?>">
+                                        <?php echo esc_html($data['responsible_email']); ?>
+                                    </a>
+                                </small>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span style="color: #999;">-</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if ($data['page_exists']): ?>
+                            <span style="color: #46b450;">✓ Erstellt</span><br>
+                            <small>
+                                <a href="<?php echo esc_url($data['page_url']); ?>" target="_blank">Seite anzeigen</a>
+                            </small>
+                        <?php else: ?>
+                            <span style="color: #d63638;">✗ Nicht erstellt</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php if ($data['last_updated']): ?>
+                            <?php 
+                            $updated = strtotime($data['last_updated']);
+                            echo esc_html(date_i18n('d.m.Y H:i', $updated));
+                            ?>
+                            <br>
+                            <small style="color: #666;">
+                                <?php echo human_time_diff($updated, current_time('timestamp')); ?> her
+                            </small>
+                        <?php else: ?>
+                            <span style="color: #999;">-</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        
         <?php
     }
 }
