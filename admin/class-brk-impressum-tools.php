@@ -150,6 +150,7 @@ class BRK_Impressum_Tools {
                 <?php endif; ?>
             <?php endif; ?>
             
+            <!-- 2-spaltiger Bereich: Cache-Verwaltung & API-Status -->
             <div class="brk-tools-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px;">
                 
                 <!-- Cache-Verwaltung -->
@@ -222,14 +223,13 @@ class BRK_Impressum_Tools {
                     
                     <div id="brk-test-results" style="margin-top: 15px;"></div>
                 </div>
-            </div>
+                
+            </div><!-- Ende 2-spaltiger Bereich -->
             
-            <!-- Verwendung im Netzwerk - Volle Breite -->
-            <div style="margin-top: 25px;">
-                <div class="card">
-                    <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
-                    <?php $this->render_network_usage(); ?>
-                </div>
+            <!-- Einspaltiger Bereich: Plugin-Verwendung im Netzwerk -->
+            <div class="card" style="margin-top: 25px;">
+                <h2>🌐 Plugin-Verwendung im Netzwerk</h2>
+                <?php $this->render_network_usage(); ?>
             </div>
             
             <!-- Fehlerdiagnose -->
