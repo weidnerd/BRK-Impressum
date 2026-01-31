@@ -193,8 +193,8 @@ class BRK_Impressum_Admin {
                             $impressum_page = get_page_by_path('impressum');
                             $footer_link_status = $this->check_footer_link($impressum_page);
                             ?>
-                            <div class="notice notice-info" style="padding: 10px; margin: 20px 0;">
-                                <p style="margin: 5px 0;">
+                            <div style="padding: 15px; margin: 20px 0; background: #f0f0f1; border-left: 4px solid #72aee6; border-radius: 3px;">
+                                <p style="margin: 0 0 10px 0;">
                                     <strong>Impressum im Footer:</strong>
                                     <?php if ($footer_link_status === 'correct'): ?>
                                         <span style="color: #46b450;">✓ Ja</span> - Der Footer-Link zeigt auf das Impressum
@@ -204,11 +204,9 @@ class BRK_Impressum_Admin {
                                         <span style="color: #d63638;">✗ Nein</span> - Kein Impressum-Link im Footer gefunden
                                     <?php endif; ?>
                                 </p>
-                                <p style="margin: 10px 0 5px;">
-                                    <button type="button" id="brk-update-footer-btn" class="button button-secondary">
-                                        Impressum in Footer übernehmen
-                                    </button>
-                                </p>
+                                <button type="button" id="brk-update-footer-btn" class="button button-secondary">
+                                    Impressum in Footer übernehmen
+                                </button>
                             </div>
                             
                             <p class="submit">
