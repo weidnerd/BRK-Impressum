@@ -131,14 +131,28 @@ Die Facilities-Daten werden für **24 Stunden** gecacht. Sie können den Cache m
 - Im Backend über den Button "Daten jetzt aktualisieren"
 - Programmatisch: `BRK_Facilities_Loader::get_instance()->refresh_cache()`
 
+### Automatische Updates
+
+Das Plugin aktualisiert **automatisch alle Impressum-Seiten**, wenn sich die Facilities-Daten ändern:
+
+1. **Tägliche Aktualisierung**: Ein WP-Cron-Job läuft jeden Tag um 3 Uhr nachts und aktualisiert alle Impressum-Seiten im gesamten Multisite-Netzwerk
+2. **Nach Cache-Refresh**: Wenn jemand im Backend "Daten jetzt aktualisieren" klickt, werden automatisch alle Impressum-Seiten aktualisiert
+
+Dies stellt sicher, dass alle Unterseiten immer die aktuellsten Daten aus `https://mein.brk.de/data/facilities.json` verwenden.
+
 ## Hooks & Filter
 
 ### Actions
 
 ```php
-// Nach Cache-Aktualisierung
-do_action('brk_impressum_refresh_cache');
+// Nach Cache-Aktualisierung (wird auch nach manuellem Refresh ausgelöst)
+do_action('brk_impressum_cache_refreshed');
+
+// Tägliche Aktualisierung aller Impressum-Seiten (3 Uhr nachts)
+do_action('brk_impressum_daily_update');
 ```
+
+**Hinweis**: Beide Actions triggern automatisch `update_all_impressum_pages()`, das alle Impressum-Seiten im Netzwerk aktualisiert.
 
 ## Systemanforderungen
 

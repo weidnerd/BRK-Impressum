@@ -165,6 +165,9 @@ class BRK_Facilities_Loader {
         // Daten im Cache speichern
         set_transient(self::CACHE_KEY, $data, self::CACHE_DURATION);
         
+        // Action Hook auslösen für automatische Updates
+        do_action('brk_impressum_cache_refreshed');
+        
         return $data;
     }
     

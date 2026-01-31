@@ -84,6 +84,12 @@ class BRK_Impressum {
         
         // Frontend-Styles laden
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
+        
+        // Cron-Job für tägliche Aktualisierung
+        add_action('brk_impressum_daily_update', array($this, 'update_all_impressum_pages'));
+        
+        // Hook nach Cache-Refresh
+        add_action('brk_impressum_cache_refreshed', array($this, 'update_all_impressum_pages'));
     }
     
     /**
@@ -119,6 +125,11 @@ class BRK_Impressum {
         
         // Facilities-Cache initial laden
         BRK_Facilities_Loader::get_instance()->refresh_cache();
+        
+        // Täglichen Cron-Job registrieren
+        if (!wp_next_scheduled('brk_impressum_daily_update')) {
+            wp_schedule_event(time(), 'daily', 'brk_impressum_daily_update');
+        }
     }
     
     /**
@@ -142,6 +153,12 @@ class BRK_Impressum {
     public function deactivate() {
         // Cache löschen
         delete_transient('brk_facilities_data');
+        
+        // Cron-Job entfernen
+        $timestamp = wp_next_scheduled('brk_impressum_daily_update');
+        if ($timestamp) {
+            wp_unschedule_event($timestamp, 'brk_impressum_daily_update');
+        }
     }
     
     /**
@@ -326,6 +343,53 @@ class BRK_Impressum {
         }
         
         return $html;
+    }
+    
+    /**
+     * Alle Impressum-Seiten im Netzwerk aktualisieren
+     * Wird täglich via Cron und nach Cache-Refresh ausgeführt
+     */
+    public function update_all_impressum_pages() {
+        if (is_multisite()) {
+            // Alle Sites im Netzwerk durchgehen
+            $sites = get_sites(array('number' => 1000)); // Max 1000 Sites
+            
+            foreach ($sites as $site) {
+                switch_to_blog($site->blog_id);
+                $this->update_single_impressum_page();
+                restore_current_blog();
+            }
+        } else {
+            // Einzelne WordPress-Installation
+            $this->update_single_impressum_page();
+        }
+    }
+    
+    /**
+     * Einzelne Impressum-Seite aktualisieren
+     */
+    private function update_single_impressum_page() {
+        $settings = get_option('brk_impressum_settings');
+        
+        // Nur aktualisieren wenn Impressum konfiguriert ist
+        if (empty($settings['facility_id'])) {
+            return;
+        }
+        
+        // Prüfen ob Impressum-Seite existiert
+        $page = get_page_by_path('impressum');
+        if (!$page) {
+            return; // Keine Seite vorhanden, nichts zu aktualisieren
+        }
+        
+        // Seite aktualisieren
+        $params = array(
+            'facility_id' => $settings['facility_id'],
+            'responsible_name' => $settings['responsible_name'],
+            'responsible_email' => $settings['responsible_email']
+        );
+        
+        $this->create_or_update_impressum_page($params);
     }
 }
 
