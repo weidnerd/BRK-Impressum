@@ -272,34 +272,6 @@ class BRK_Impressum_Tools {
                 <?php endif; ?>
             </div>
             <?php endif; ?>
-            
-            <!-- System-Informationen -->
-            <div class="card" style="margin-top: 20px;">
-                <h2>ℹ️ System-Informationen</h2>
-                
-                <table class="widefat">
-                    <tr>
-                        <th style="width: 200px;">WordPress-Version:</th>
-                        <td><?php echo get_bloginfo('version'); ?></td>
-                    </tr>
-                    <tr>
-                        <th>PHP-Version:</th>
-                        <td><?php echo PHP_VERSION; ?></td>
-                    </tr>
-                    <tr>
-                        <th>Plugin-Version:</th>
-                        <td><?php echo BRK_IMPRESSUM_VERSION; ?></td>
-                    </tr>
-                    <tr>
-                        <th>Multisite:</th>
-                        <td><?php echo is_multisite() ? 'Ja' : 'Nein'; ?></td>
-                    </tr>
-                    <tr>
-                        <th>WP_DEBUG:</th>
-                        <td><?php echo defined('WP_DEBUG') && WP_DEBUG ? 'Aktiv' : 'Inaktiv'; ?></td>
-                    </tr>
-                </table>
-            </div>
         </div>
         <?php
     }
