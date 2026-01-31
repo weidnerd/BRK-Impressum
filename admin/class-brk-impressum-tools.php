@@ -150,7 +150,7 @@ class BRK_Impressum_Tools {
                 <?php endif; ?>
             <?php endif; ?>
             
-            <div class="brk-tools-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+            <div class="brk-tools-grid" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-top: 20px;">
                 
                 <div style="display: flex; flex-direction: column; gap: 20px;">
                     <!-- Cache-Verwaltung -->
@@ -188,6 +188,41 @@ class BRK_Impressum_Tools {
                                 🔄 Cache neu laden
                             </a>
                         </p>
+                    </div>
+                    
+                    <!-- Facilities-Liste -->
+                    <div class="card">
+                        <h2>📋 Geladene Facilities (<?php echo is_array($facilities) ? count($facilities) : 0; ?>)</h2>
+                        
+                        <?php if (is_array($facilities) && !empty($facilities)): ?>
+                        <table class="widefat striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Ebene</th>
+                                    <th>Ort</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach (array_slice($facilities, 0, 20) as $facility): ?>
+                                <tr>
+                                    <td><code><?php echo esc_html($facility['id']); ?></code></td>
+                                    <td><?php echo esc_html($facility['name']); ?></td>
+                                    <td><?php echo esc_html($facility['ebene'] ?? '-'); ?></td>
+                                    <td><?php echo esc_html($facility['anschrift']['ort'] ?? '-'); ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <?php if (count($facilities) > 20): ?>
+                        <p style="margin-top: 10px; color: #666;">
+                            <em>Es werden die ersten 20 von <?php echo count($facilities); ?> Einträgen angezeigt.</em>
+                        </p>
+                        <?php endif; ?>
+                        <?php else: ?>
+                        <p>Keine Facilities geladen.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
@@ -275,41 +310,6 @@ class BRK_Impressum_Tools {
                 <?php endif; ?>
             </div>
             <?php endif; ?>
-            
-            <!-- Facilities-Liste -->
-            <div class="card" style="margin-top: 20px;">
-                <h2>📋 Geladene Facilities (<?php echo is_array($facilities) ? count($facilities) : 0; ?>)</h2>
-                
-                <?php if (is_array($facilities) && !empty($facilities)): ?>
-                <table class="widefat striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Ebene</th>
-                            <th>Ort</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach (array_slice($facilities, 0, 20) as $facility): ?>
-                        <tr>
-                            <td><code><?php echo esc_html($facility['id']); ?></code></td>
-                            <td><?php echo esc_html($facility['name']); ?></td>
-                            <td><?php echo esc_html($facility['ebene'] ?? '-'); ?></td>
-                            <td><?php echo esc_html($facility['anschrift']['ort'] ?? '-'); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-                <?php if (count($facilities) > 20): ?>
-                <p style="margin-top: 10px; color: #666;">
-                    <em>Es werden die ersten 20 von <?php echo count($facilities); ?> Einträgen angezeigt.</em>
-                </p>
-                <?php endif; ?>
-                <?php else: ?>
-                <p>Keine Facilities geladen.</p>
-                <?php endif; ?>
-            </div>
             
             <!-- System-Informationen -->
             <div class="card" style="margin-top: 20px;">
