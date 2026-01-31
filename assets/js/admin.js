@@ -19,9 +19,15 @@
          * Event-Listener binden
          */
         bindEvents: function() {
+            console.log('bindEvents wird ausgeführt');
+            console.log('Footer-Button existiert:', $('#brk-update-footer-btn').length);
+            
             $('#brk-preview-btn').on('click', this.showPreview.bind(this));
             $('#brk-save-btn').on('click', this.saveImpressum.bind(this));
-            $('#brk-update-footer-btn').on('click', this.updateFooterLink.bind(this));
+            
+            // Footer-Button mit Event-Delegation
+            $(document).on('click', '#brk-update-footer-btn', this.updateFooterLink.bind(this));
+            
             $('#brk-refresh-cache').on('click', this.refreshCache.bind(this));
             $('#brk-test-api').on('click', this.testApiConnection.bind(this));
             $('#brk-impressum-form').on('submit', this.handleFormSubmit.bind(this));
