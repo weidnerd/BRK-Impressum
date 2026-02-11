@@ -58,6 +58,30 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - PHP Warning bei undefinierter Variable $impressum_page
 - JavaScript Event-Binding-Problem mit Event-Delegation gelöst
 
+## [1.2.0] - 2026-02-11
+
+### Geändert
+- Impressum-Struktur komplett überarbeitet:
+  - Landesverband-Angaben erscheinen jetzt zuerst als Hauptanbieter
+  - Neuer Abschnitt "Ansprechpartner vor Ort" für lokale Verbände
+  - "vertreten durch das Präsidium" als Vertretungsangabe
+  - USt-Id.-Nr. (DE129523533) fest integriert
+- Neue Felder für Kontaktdaten: Fax (`kontakt.fax`) und Internet (`kontakt.internet`)
+- Überschrift von "Anbieterkennung nach § 5 TMG" zu "Anbieterkennung" vereinfacht
+- Statischer Impressum-Text aktualisiert:
+  - Einleitungsabsatz zusammengefasst, Hinweis auf Facebook/soziale Netzwerke ergänzt
+  - Ministerium aktualisiert: "für Sport und Integration" (statt "für Bau und Verkehr")
+  - Satzungsdatum aktualisiert auf 25.11.2023 (Bekanntmachung vom 29.11.2024)
+  - Reihenfolge: Vertretungsberechtigte vor Vereinsregistereintrag
+  - Verbraucherschlichtung ohne eigene Überschrift
+
+### Entfernt
+- Abschnitt "Angaben zum Landesverband" (jetzt im Hauptblock)
+- Abschnitt "Verantwortlich i.S.d. § 5 TMG" (ersetzt durch neue Struktur)
+- Freitext über Aufsichtsbehörde
+- Absatz "Gewährleistung Vollständigkeit, Richtigkeit und Aktualität"
+- Absatz "Lob und/oder Beschwerden"
+
 ## [Unveröffentlicht]
 
 ### Geplant
