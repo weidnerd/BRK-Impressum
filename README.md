@@ -93,7 +93,9 @@ Das Plugin erwartet folgende Struktur in der `facilities.json`:
     },
     "kontakt": {
       "telefon": "089 9241-0",
-      "email": "info@brk.de"
+      "fax": "089 9241-199",
+      "email": "info@brk.de",
+      "internet": "https://brk.de"
     },
     "vorstand": {
       "funktion": "Präsident",
@@ -184,14 +186,16 @@ do_action('brk_impressum_daily_update');
 brk-impressum/
 ├── brk-impressum.php           # Haupt-Plugin-Datei
 ├── admin/
-│   └── class-brk-impressum-admin.php
+│   ├── class-brk-impressum-admin.php
+│   └── class-brk-impressum-tools.php
 ├── includes/
 │   ├── class-brk-facilities-loader.php
 │   ├── class-brk-impressum-generator.php
 │   └── class-brk-impressum-settings.php
 ├── assets/
 │   ├── css/
-│   │   └── admin.css
+│   │   ├── admin.css
+│   │   └── frontend.css
 │   └── js/
 │       └── admin.js
 └── README.md
@@ -272,6 +276,17 @@ Bei Fragen oder Problemen wenden Sie sich bitte an:
 GPL v2 oder höher
 
 ## Changelog
+
+### Version 1.2.0
+- Impressum-Struktur komplett überarbeitet (Landesverband zuerst, Ansprechpartner vor Ort)
+- Neue Felder: Fax, Internet, USt-Id.-Nr.
+- Statische Texte aktualisiert (Ministerium, Satzungsdatum, soziale Netzwerke)
+
+### Version 1.1.0
+- Footer-Link-Erkennung für YooTheme Builder
+- Status-Anzeige und automatische Footer-Link-Aktualisierung
+- Debug-Ansicht in Network Admin Tools
+- Verbesserte AJAX-Fehlerbehandlung
 
 ### Version 1.0.0
 - Initiales Release

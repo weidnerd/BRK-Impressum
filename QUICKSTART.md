@@ -213,6 +213,6 @@ Bei Problemen prüfen:
 
 ---
 
-**Version:** 1.0.0 mit Fallback-System  
-**Datum:** 21. Januar 2026  
+**Version:** 1.2.0 mit Fallback-System  
+**Datum:** 11. Februar 2026  
 **Status:** ✅ Produktionsbereit
