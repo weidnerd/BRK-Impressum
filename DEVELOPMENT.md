@@ -8,9 +8,10 @@
 brk-impressum/
 ├── brk-impressum.php                    # Hauptdatei, Plugin-Bootstrap
 ├── admin/                               # Admin-Interface
-│   └── class-brk-impressum-admin.php   # Admin-Seite und Einstellungen
+│   ├── class-brk-impressum-admin.php    # Admin-Seite und Einstellungen
+│   └── class-brk-impressum-tools.php    # Network Admin Tools
 ├── includes/                            # Core-Funktionalität
-│   ├── class-brk-facilities-loader.php # API-Anbindung und Caching
+│   ├── class-brk-facilities-loader.php  # API-Anbindung und Caching
 │   ├── class-brk-impressum-generator.php # HTML-Generierung
 │   └── class-brk-impressum-settings.php  # Einstellungsverwaltung
 └── assets/                              # Frontend-Ressourcen
@@ -46,6 +47,11 @@ brk-impressum/
 - Footer-Link-Erkennung (YooTheme Builder)
 - AJAX-Handler für Footer-Link-Updates
 
+#### `BRK_Impressum_Tools`
+- Network Admin Tools
+- Debug-Ansicht für Widget-Analyse
+- Nutzungsübersicht aller Sites
+
 #### `BRK_Impressum_Settings`
 - Einstellungsverwaltung
 - Validierung
@@ -73,7 +79,7 @@ curl -X GET https://ihre-domain.de/wp-json/brk-impressum/v1/facilities \
     "ebene": "Landesverband",
     "name": "BRK Landesverband Bayern",
     "anschrift": { ... },
-    "kontakt": { ... },
+    "kontakt": { "telefon": "...", "fax": "...", "email": "...", "internet": "..." },
     "vorstand": { ... },
     "geschaeftsfuehrung": { ... }
   }
@@ -153,7 +159,6 @@ $generator = BRK_Impressum_Generator::get_instance();
 $html = $generator->generate_impressum(
     '001',                    // Facility-ID
     'Max Mustermann',        // Name
-    'Webmaster',             // Funktion
     'max@example.com'        // E-Mail
 );
 
@@ -329,7 +334,7 @@ wp plugin activate brk-impressum
 wp eval 'print_r(BRK_Facilities_Loader::get_instance()->get_facilities());'
 
 # Impressum generieren
-wp eval 'echo BRK_Impressum_Generator::get_instance()->generate_impressum("001", "Test", "Funktion", "test@example.com");'
+wp eval 'echo BRK_Impressum_Generator::get_instance()->generate_impressum("001", "Test", "test@example.com");'
 
 # Cache löschen
 wp eval 'BRK_Facilities_Loader::get_instance()->clear_cache();'
