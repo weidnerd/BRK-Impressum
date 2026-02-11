@@ -82,6 +82,14 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Absatz "Gewährleistung Vollständigkeit, Richtigkeit und Aktualität"
 - Absatz "Lob und/oder Beschwerden"
 
+## [1.2.1] - 2026-02-11
+
+### Geändert
+- Frontend-CSS-Laden deaktiviert: Impressum übernimmt nun die Styles des aktiven WordPress-Themes
+
+### Entfernt
+- Inhalt von `assets/css/frontend.css` entfernt (Datei als Platzhalter beibehalten)
+
 ## [Unveröffentlicht]
 
 ### Geplant

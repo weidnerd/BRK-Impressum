@@ -277,6 +277,9 @@ GPL v2 oder höher
 
 ## Changelog
 
+### Version 1.2.1
+- Frontend-CSS-Laden deaktiviert: Impressum nutzt Theme-Styles
+
 ### Version 1.2.0
 - Impressum-Struktur komplett überarbeitet (Landesverband zuerst, Ansprechpartner vor Ort)
 - Neue Felder: Fax, Internet, USt-Id.-Nr.

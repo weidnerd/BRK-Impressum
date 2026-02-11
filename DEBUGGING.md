@@ -335,7 +335,7 @@ Wenn Sie den BRK-Support kontaktieren, geben Sie bitte an:
 
 ---
 
-**Version:** 1.2.0 mit erweiterter Fehlerdiagnose und Footer-Link-Features  
+**Version:** 1.2.1 mit erweiterter Fehlerdiagnose und Footer-Link-Features  
 **Datum:** 11. Februar 2026
 
 ## 🔗 Footer-Link Debugging (YooTheme)
