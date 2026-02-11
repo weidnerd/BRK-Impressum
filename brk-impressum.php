@@ -94,17 +94,20 @@ class BRK_Impressum {
     
     /**
      * Frontend-Assets laden
+     * 
+     * Deaktiviert: Das Theme übernimmt die Darstellung des Impressums.
+     * Bei Bedarf wieder aktivieren, um BRK-spezifische Styles zu laden.
      */
     public function enqueue_frontend_assets() {
-        // Nur laden wenn Shortcode oder Impressum-Seite
-        if (is_page('impressum') || has_shortcode(get_post()->post_content ?? '', 'brk_impressum')) {
-            wp_enqueue_style(
-                'brk-impressum-frontend',
-                BRK_IMPRESSUM_PLUGIN_URL . 'assets/css/frontend.css',
-                array(),
-                BRK_IMPRESSUM_VERSION
-            );
-        }
+        // CSS-Laden deaktiviert - Theme-Styles werden verwendet
+        // if (is_page('impressum') || has_shortcode(get_post()->post_content ?? '', 'brk_impressum')) {
+        //     wp_enqueue_style(
+        //         'brk-impressum-frontend',
+        //         BRK_IMPRESSUM_PLUGIN_URL . 'assets/css/frontend.css',
+        //         array(),
+        //         BRK_IMPRESSUM_VERSION
+        //     );
+        // }
     }
     
     /**
