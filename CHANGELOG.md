@@ -90,6 +90,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Entfernt
 - Inhalt von `assets/css/frontend.css` entfernt (Datei als Platzhalter beibehalten)
 
+## [1.2.2] - 2026-02-12
+
+### Entfernt
+- Impressum-Vorschau-Styles (`.brk-impressum`) aus `admin.css` entfernt (Vorschau nutzt WordPress-Admin-Styles)
+- Ungenutzten CSS-Abschnitt "Loading State" (`.button.loading`) aus `admin.css` entfernt
+
 ## [Unveröffentlicht]
 
 ### Geplant

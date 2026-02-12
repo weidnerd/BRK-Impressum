@@ -277,6 +277,9 @@ GPL v2 oder höher
 
 ## Changelog
 
+### Version 1.2.2
+- Ungenutzte CSS-Styles aus admin.css entfernt (Vorschau-Styles, Loading State)
+
 ### Version 1.2.1
 - Frontend-CSS-Laden deaktiviert: Impressum nutzt Theme-Styles
 
