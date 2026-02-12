@@ -214,26 +214,6 @@
     border-color: #46b450;
 }
 
-/* ===== Loading State ===== */
-.brk-impressum-admin .button.loading {
-    position: relative;
-    color: transparent;
-}
-
-.brk-impressum-admin .button.loading::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 16px;
-    height: 16px;
-    margin: -8px 0 0 -8px;
-    border: 2px solid #fff;
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-}
-
 /* ===== WordPress Notice Overrides ===== */
 .brk-impressum-admin .notice {
     position: relative;
