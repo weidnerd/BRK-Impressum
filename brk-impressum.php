@@ -5,7 +5,7 @@
  * Description: Automatische Impressum-Generierung für WordPress Multisite-Unterseiten basierend auf BRK Facilities-Daten
  * Author: Daniel Weidner, AG IT der Wasserwacht Bayern (+AI)
  * Author URI: https://minicms.wasserwacht.de/
- * Version: 1.2.2
+ * Version: 1.2.3
  * Network: true
  */
 
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin-Konstanten definieren
-define('BRK_IMPRESSUM_VERSION', '1.2.2');
+define('BRK_IMPRESSUM_VERSION', '1.2.3');
 define('BRK_IMPRESSUM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BRK_IMPRESSUM_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BRK_IMPRESSUM_PLUGIN_FILE', __FILE__);
@@ -85,11 +85,34 @@ class BRK_Impressum {
         // Frontend-Styles laden
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
         
-        // Cron-Job für tägliche Aktualisierung
-        add_action('brk_impressum_daily_update', array($this, 'update_all_impressum_pages'));
+        // Cron-Job für regelmäßige Datenaktualisierung
+        add_action('brk_impressum_daily_update', array($this, 'refresh_facilities_cache'));
         
         // Hook nach Cache-Refresh
         add_action('brk_impressum_cache_refreshed', array($this, 'update_all_impressum_pages'));
+
+        // Sicherstellen, dass der Update-Cron korrekt geplant ist
+        $this->ensure_update_cron_schedule();
+    }
+
+    /**
+     * Sicherstellen, dass der Cron-Job täglich geplant ist
+     */
+    private function ensure_update_cron_schedule() {
+        $timestamp = wp_next_scheduled('brk_impressum_daily_update');
+
+        if (!$timestamp) {
+            wp_schedule_event(time(), 'daily', 'brk_impressum_daily_update');
+            return;
+        }
+
+        if (function_exists('wp_get_scheduled_event')) {
+            $event = wp_get_scheduled_event('brk_impressum_daily_update');
+            if ($event && isset($event->schedule) && $event->schedule !== 'daily') {
+                wp_unschedule_event($timestamp, 'brk_impressum_daily_update');
+                wp_schedule_event(time(), 'daily', 'brk_impressum_daily_update');
+            }
+        }
     }
     
     /**
@@ -129,7 +152,7 @@ class BRK_Impressum {
         // Facilities-Cache initial laden
         BRK_Facilities_Loader::get_instance()->refresh_cache();
         
-        // Täglichen Cron-Job registrieren
+        // Regelmäßigen Cron-Job registrieren
         if (!wp_next_scheduled('brk_impressum_daily_update')) {
             wp_schedule_event(time(), 'daily', 'brk_impressum_daily_update');
         }
@@ -156,12 +179,23 @@ class BRK_Impressum {
     public function deactivate() {
         // Cache löschen
         delete_transient('brk_facilities_data');
+        delete_transient('brk_facilities_hash');
         
         // Cron-Job entfernen
         $timestamp = wp_next_scheduled('brk_impressum_daily_update');
         if ($timestamp) {
             wp_unschedule_event($timestamp, 'brk_impressum_daily_update');
         }
+    }
+
+    /**
+     * Facilities-Cache aktualisieren
+     *
+     * Hinweis: Die Aktualisierung der Impressum-Seiten erfolgt über den
+     * Hook 'brk_impressum_cache_refreshed' nur bei echten Datenänderungen.
+     */
+    public function refresh_facilities_cache() {
+        BRK_Facilities_Loader::get_instance()->refresh_cache();
     }
     
     /**

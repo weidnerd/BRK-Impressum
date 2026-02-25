@@ -7,7 +7,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [1.0.0] - 2026-01-21
 
-### Hinzugefügt
+### Hinzugefügt (1.0.0)
+
 - Initiales Release des BRK Impressum Generators
 - Automatisches Laden von Verband-Daten aus BRK Facilities API
 - Backend-Konfigurationsseite mit intuitivem Formular
@@ -31,6 +32,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - PHP Coding Standards Konfiguration
 
 ### Sicherheit
+
 - Nonce-Validierung für alle Formulare
 - Capability-Checks für Admin-Zugriff
 - Sanitization aller Eingaben
@@ -39,7 +41,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [1.1.0] - 2026-01-31
 
-### Hinzugefügt
+### Hinzugefügt (1.1.0)
+
 - Footer-Link-Erkennung für YooTheme Builder Widgets
 - Automatische Überprüfung ob Impressum-Link im Footer vorhanden ist
 - Status-Anzeige "Impressum im Footer" (✓ Ja / ✗ Nein / ✗ Falsch)
@@ -49,18 +52,21 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Event-Delegation für robustes JavaScript-Event-Handling
 - Cache-Busting mit Zeitstempel für Asset-Versionierung
 
-### Geändert
+### Geändert (1.1.0)
+
 - Footer-Link-Status jetzt innerhalb der Konfigurations-Box integriert
 - Verbesserte AJAX-Fehlerbehandlung mit detaillierten Meldungen
 - Optimierte Widget-Suche: Nur Bottom-Sidebar, nur Builder-Widgets
 
-### Behoben
+### Behoben (1.1.0)
+
 - PHP Warning bei undefinierter Variable $impressum_page
 - JavaScript Event-Binding-Problem mit Event-Delegation gelöst
 
 ## [1.2.0] - 2026-02-11
 
-### Geändert
+### Geändert (1.2.0)
+
 - Impressum-Struktur komplett überarbeitet:
   - Landesverband-Angaben erscheinen jetzt zuerst als Hauptanbieter
   - Neuer Abschnitt "Ansprechpartner vor Ort" für lokale Verbände
@@ -75,7 +81,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   - Reihenfolge: Vertretungsberechtigte vor Vereinsregistereintrag
   - Verbraucherschlichtung ohne eigene Überschrift
 
-### Entfernt
+### Entfernt (1.2.0)
+
 - Abschnitt "Angaben zum Landesverband" (jetzt im Hauptblock)
 - Abschnitt "Verantwortlich i.S.d. § 5 TMG" (ersetzt durch neue Struktur)
 - Freitext über Aufsichtsbehörde
@@ -84,21 +91,41 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [1.2.1] - 2026-02-11
 
-### Geändert
+### Geändert (1.2.1)
+
 - Frontend-CSS-Laden deaktiviert: Impressum übernimmt nun die Styles des aktiven WordPress-Themes
 
-### Entfernt
+### Entfernt (1.2.1)
+
 - Inhalt von `assets/css/frontend.css` entfernt (Datei als Platzhalter beibehalten)
 
 ## [1.2.2] - 2026-02-12
 
-### Entfernt
+### Entfernt (1.2.2)
+
 - Impressum-Vorschau-Styles (`.brk-impressum`) aus `admin.css` entfernt (Vorschau nutzt WordPress-Admin-Styles)
 - Ungenutzten CSS-Abschnitt "Loading State" (`.button.loading`) aus `admin.css` entfernt
+
+## [1.2.3] - 2026-02-25
+
+### Geändert (1.2.3)
+
+- DRK-Vertretungsangabe im statischen Impressumsteil ist jetzt dynamisch aus Facility `id=999`:
+  - `geschaeftsfuehrung.name`
+  - `geschaeftsfuehrung.funktion`
+- Automatische Aktualisierung bei Datenänderungen optimiert:
+  - JSON-Hash-Vergleich vor dem Auslösen von `brk_impressum_cache_refreshed`
+  - Netzwerkweite Seitenaktualisierung nur bei echten Inhaltsänderungen
+- Cron-Planung vereinheitlicht auf **1x täglich** (`daily`) mit automatischer Korrektur bestehender abweichender Schedules
+
+  ### Behoben (1.2.3)
+
+- Verhindert unnötige Re-Generierung aller Impressum-Seiten, wenn sich die JSON-Inhalte nicht geändert haben
 
 ## [Unveröffentlicht]
 
 ### Geplant
+
 - Unit Tests mit PHPUnit
 - Mehrsprachige Unterstützung (i18n)
 - Export-Funktion für Impressum als PDF

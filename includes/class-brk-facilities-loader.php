@@ -156,17 +156,26 @@ class BRK_Facilities_Loader {
         
         // Erfolg! Fehler-Transient löschen
         delete_transient('brk_impressum_last_error');
+
+        // Datenänderung erkennen (Hash über normalisierte JSON-Daten)
+        $current_hash = md5(wp_json_encode($data));
+        $previous_hash = get_transient('brk_facilities_hash');
+        $has_changed = ($previous_hash !== $current_hash);
         
         $debug_info['success'] = true;
         $debug_info['facilities_count'] = count($data);
         $debug_info['valid_facilities'] = $valid_count;
+        $debug_info['data_changed'] = $has_changed;
         error_log('BRK Impressum Success: Loaded ' . count($data) . ' facilities (' . $valid_count . ' valid)');
         
         // Daten im Cache speichern
         set_transient(self::CACHE_KEY, $data, self::CACHE_DURATION);
+        set_transient('brk_facilities_hash', $current_hash, self::CACHE_DURATION);
         
-        // Action Hook auslösen für automatische Updates
-        do_action('brk_impressum_cache_refreshed');
+        // Action Hook nur bei echten Datenänderungen auslösen
+        if ($has_changed) {
+            do_action('brk_impressum_cache_refreshed');
+        }
         
         return $data;
     }

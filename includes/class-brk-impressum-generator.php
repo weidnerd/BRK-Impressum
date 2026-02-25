@@ -219,6 +219,21 @@ class BRK_Impressum_Generator {
      * Statischen Inhalt des Impressums zurückgeben
      */
     private function get_static_content() {
+        $drk_gf_name = 'Christian Reuter';
+        $drk_gf_funktion = 'Generalsekretär und Vorsitzender des Vorstands';
+
+        $drk_bundesverband = $this->loader->get_facility_by_id('999');
+        if (!is_wp_error($drk_bundesverband)) {
+            $drk_gf_name = $this->loader->get_nested_value($drk_bundesverband, 'geschaeftsfuehrung.name', $drk_gf_name);
+            $drk_gf_funktion = $this->loader->get_nested_value($drk_bundesverband, 'geschaeftsfuehrung.funktion', $drk_gf_funktion);
+        }
+
+        $drk_vertretung_text = sprintf(
+            'Das Deutsche Rote Kreuz e.V. wird gesetzlich vertreten durch %s, %s.',
+            $drk_gf_name,
+            $drk_gf_funktion
+        );
+
         ob_start();
         ?>
         <p>Das Bayerische Rote Kreuz stellt seine Inhalte im Internet sorgfältig zusammen, übernimmt jedoch keine Haftung für mögliche Übertragungsfehler von Schriftstücken oder Fehler auf Grund unbefugter Veränderungen durch Dritte. Die hier enthaltenen Informationen enthalten die gesetzlich vorgesehenen Pflichtangaben zur Anbieterkennzeichnung zur Internetpräsenz des Bayerischen Roten Kreuzes. Dieses Impressum gilt ebenso für die BRK-Seiten bei Facebook und anderen sozialen Netzwerken.</p>
@@ -233,7 +248,7 @@ class BRK_Impressum_Generator {
         
         <h4>Vertretungsberechtigte des DRK e.V.</h4>
         
-        <p>Das Deutsche Rote Kreuz e.V. wird gesetzlich vertreten durch Christian Reuter, Generalsekretär und Vorsitzender des Vorstands.</p>
+        <p><?php echo esc_html($drk_vertretung_text); ?></p>
         
         <h4>Vereinsregistereintrag des DRK e.V.</h4>
         

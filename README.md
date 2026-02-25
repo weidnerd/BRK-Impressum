@@ -68,11 +68,11 @@ Das Plugin erkennt automatisch Impressum-Links in YooTheme Builder Widgets:
 
 Das Impressum wird automatisch unter `/impressum` verfügbar gemacht.
 
-**Alternative: Shortcode**
+### Alternative: Shortcode
 
 Sie können das Impressum auch auf jeder beliebigen Seite mit dem Shortcode einbinden:
 
-```
+```text
 [brk_impressum]
 ```
 
@@ -127,6 +127,7 @@ Generiert eine Vorschau des Impressums.
 **Berechtigung:** `manage_options`
 
 **Parameter:**
+
 ```json
 {
   "facility_id": "123",
@@ -155,8 +156,9 @@ Die Facilities-Daten werden für **24 Stunden** gecacht. Sie können den Cache m
 
 Das Plugin aktualisiert **automatisch alle Impressum-Seiten**, wenn sich die Facilities-Daten ändern:
 
-1. **Tägliche Aktualisierung**: Ein WP-Cron-Job läuft jeden Tag um 3 Uhr nachts und aktualisiert alle Impressum-Seiten im gesamten Multisite-Netzwerk
-2. **Nach Cache-Refresh**: Wenn jemand im Backend "Daten jetzt aktualisieren" klickt, werden automatisch alle Impressum-Seiten aktualisiert
+1. **Tägliche Aktualisierung**: Ein WP-Cron-Job lädt die Facilities-Daten einmal pro Tag neu
+2. **Änderungserkennung**: Nur wenn sich die JSON-Inhalte wirklich geändert haben (Hash-Vergleich), werden die Impressum-Seiten im Netzwerk neu generiert
+3. **Nach manuellem Refresh**: Auch bei "Daten jetzt aktualisieren" gilt dieselbe Änderungserkennung
 
 Dies stellt sicher, dass alle Unterseiten immer die aktuellsten Daten aus `https://mein.brk.de/data/facilities.json` verwenden.
 
@@ -165,14 +167,14 @@ Dies stellt sicher, dass alle Unterseiten immer die aktuellsten Daten aus `https
 ### Actions
 
 ```php
-// Nach Cache-Aktualisierung (wird auch nach manuellem Refresh ausgelöst)
+// Nach Cache-Aktualisierung (nur bei echten Datenänderungen)
 do_action('brk_impressum_cache_refreshed');
 
-// Tägliche Aktualisierung aller Impressum-Seiten (3 Uhr nachts)
+// Täglicher WP-Cron-Refresh der Facilities-Daten
 do_action('brk_impressum_daily_update');
 ```
 
-**Hinweis**: Beide Actions triggern automatisch `update_all_impressum_pages()`, das alle Impressum-Seiten im Netzwerk aktualisiert.
+**Hinweis**: `brk_impressum_daily_update` startet den Daten-Refresh. Die eigentliche Seitenaktualisierung (`update_all_impressum_pages()`) läuft über `brk_impressum_cache_refreshed` und nur bei erkannten Datenänderungen.
 
 ## Systemanforderungen
 
@@ -182,7 +184,7 @@ do_action('brk_impressum_daily_update');
 
 ## Verzeichnisstruktur
 
-```
+```text
 brk-impressum/
 ├── brk-impressum.php           # Haupt-Plugin-Datei
 ├── admin/
@@ -216,6 +218,7 @@ Das Plugin verwendet automatisch **Fallback-Daten**, wenn die API nicht erreichb
 3. **Testen**: Klicken Sie auf "API-Verbindung testen" in den Debug-Informationen
 
 **Für Produktivumgebungen:**
+
 1. Überprüfen Sie die Verbindung zu `https://mein.brk.de/data/facilities.json`
 2. Stellen Sie sicher, dass SSL-Zertifikate korrekt konfiguriert sind
 3. Prüfen Sie die PHP-Fehlerlog-Datei: `tail -f /pfad/zu/php-error.log`
@@ -223,11 +226,13 @@ Das Plugin verwendet automatisch **Fallback-Daten**, wenn die API nicht erreichb
 5. Kontaktieren Sie den BRK-Administrator für API-Zugang
 
 **Debug-Modus:**
+
 ```php
 // In wp-config.php
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
 ```
+
 Prüfen Sie dann `wp-content/debug.log` auf Fehler.
 
 ### Vorschau wird nicht angezeigt
@@ -235,6 +240,7 @@ Prüfen Sie dann `wp-content/debug.log` auf Fehler.
 **Problem:** Die Vorschau bleibt leer
 
 **Lösung:**
+
 1. Öffnen Sie die Browser-Konsole (F12) und prüfen Sie auf JavaScript-Fehler
 2. Stellen Sie sicher, dass alle Pflichtfelder ausgefüllt sind
 3. Prüfen Sie, ob REST API funktioniert: `/wp-json/brk-impressum/v1/facilities`
@@ -244,6 +250,7 @@ Prüfen Sie dann `wp-content/debug.log` auf Fehler.
 **Problem:** "Impressum übernehmen" funktioniert nicht
 
 **Lösung:**
+
 1. Prüfen Sie die Benutzerberechtigungen (`manage_options`)
 2. Stellen Sie sicher, dass WordPress Seiten erstellen kann
 3. Prüfen Sie die Datenbankverbindung
@@ -268,8 +275,8 @@ Das Plugin folgt den WordPress PHP Coding Standards.
 
 Bei Fragen oder Problemen wenden Sie sich bitte an:
 
-- GitHub Issues: https://github.com/weidnerd/BRK-Impressum/issues
-- BRK Support: support@brk.de
+- GitHub Issues: [https://github.com/weidnerd/BRK-Impressum/issues](https://github.com/weidnerd/BRK-Impressum/issues)
+- BRK Support: [support@brk.de](mailto:support@brk.de)
 
 ## Lizenz
 
@@ -277,24 +284,35 @@ GPL v2 oder höher
 
 ## Changelog
 
+### Version 1.2.3
+
+- DRK-Vertretungsangabe wird dynamisch aus Facility ID 999 (`geschaeftsfuehrung.name` und `geschaeftsfuehrung.funktion`) übernommen
+- Datenänderungen werden per JSON-Hash erkannt, Seitenaktualisierung erfolgt nur bei echten Änderungen
+- WP-Cron-Planung auf tägliche Aktualisierung vereinheitlicht
+
 ### Version 1.2.2
+
 - Ungenutzte CSS-Styles aus admin.css entfernt (Vorschau-Styles, Loading State)
 
 ### Version 1.2.1
+
 - Frontend-CSS-Laden deaktiviert: Impressum nutzt Theme-Styles
 
 ### Version 1.2.0
+
 - Impressum-Struktur komplett überarbeitet (Landesverband zuerst, Ansprechpartner vor Ort)
 - Neue Felder: Fax, Internet, USt-Id.-Nr.
 - Statische Texte aktualisiert (Ministerium, Satzungsdatum, soziale Netzwerke)
 
 ### Version 1.1.0
+
 - Footer-Link-Erkennung für YooTheme Builder
 - Status-Anzeige und automatische Footer-Link-Aktualisierung
 - Debug-Ansicht in Network Admin Tools
 - Verbesserte AJAX-Fehlerbehandlung
 
 ### Version 1.0.0
+
 - Initiales Release
 - Basis-Funktionalität für Impressum-Generierung
 - Admin-Interface mit Live-Vorschau
