@@ -13,7 +13,7 @@ Das Plugin funktioniert jetzt auch **ohne Zugang zur Live-API**!
 
 2. **3-stufiges Fallback-System:**
    ```
-   1. Versuch: Live-API (https://mein.brk.de/data/facilities.json)
+   1. Versuch: Live-API (https://api.brk.id/api/v1/assets/facility.json)
                 ↓ (bei Fehler)
    2. Versuch: Lokale Datei (facilities-example.json)
                 ↓ (bei Fehler)
@@ -85,7 +85,7 @@ Im Backend unter "Fehlerbehebung":
 
 1. **API-Zugang bei BRK anfordern**
    - Kontakt: support@brk.de
-   - Berechtigung für `https://mein.brk.de/data/facilities.json`
+   - Berechtigung für `https://api.brk.id/api/v1/assets/facility.json`
 
 2. **Im Plugin nichts ändern**
    - Das Plugin erkennt automatisch, wenn die API erreichbar ist

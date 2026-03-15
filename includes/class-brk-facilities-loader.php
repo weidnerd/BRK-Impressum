@@ -138,11 +138,21 @@ class BRK_Facilities_Loader {
             return $this->load_fallback_data($debug_info);
         }
         
-        // API-Struktur: {"brk_facilities": [...]} - Array extrahieren
-        if (isset($data['brk_facilities']) && is_array($data['brk_facilities'])) {
-            error_log('BRK Impressum: Extracting facilities from brk_facilities key');
-            $data = $data['brk_facilities'];
+        // API-Antwort in ein reines Facilities-Array extrahieren.
+        $data = $this->extract_facilities_array($data);
+        if (is_wp_error($data)) {
+            $debug_info['error_type'] = 'Format_Error';
+            $debug_info['error_message'] = $data->get_error_message();
+
+            error_log('BRK Impressum Format Error: ' . print_r($debug_info, true));
+            set_transient('brk_impressum_last_error', $debug_info, 3600);
+
+            return $this->load_fallback_data($debug_info);
         }
+
+        // Neue API-Felder (address/contact/board/management) auf das bisherige
+        // interne Format (anschrift/kontakt/vorstand/geschaeftsfuehrung) abbilden.
+        $data = $this->normalize_facilities($data);
         
         // Finale Validierung: Prüfen ob wir valide Facilities haben
         $valid_count = 0;
@@ -194,7 +204,7 @@ class BRK_Facilities_Loader {
         }
         
         foreach ($facilities as $facility) {
-            if (isset($facility['id']) && $facility['id'] === $facility_id) {
+            if (isset($facility['id']) && strval($facility['id']) === strval($facility_id)) {
                 return $facility;
             }
         }
@@ -234,7 +244,7 @@ class BRK_Facilities_Loader {
         
         foreach ($facilities as $facility) {
             if (isset($facility['id']) && isset($facility['name'])) {
-                $options[$facility['id']] = $facility['name'];
+                $options[strval($facility['id'])] = $facility['name'];
             }
         }
         
@@ -265,6 +275,116 @@ class BRK_Facilities_Loader {
         
         return $value !== '' ? $value : $default;
     }
+
+    /**
+     * Facilities-Array aus unterschiedlichen API-Antwortformaten extrahieren.
+     *
+     * Unterstützt:
+     * - Direktes Array von Facilities
+     * - Objekt mit Key "brk_facilities"
+     * - Objekt mit Key "facilities"
+     * - Objekt mit Key "data"
+     *
+     * @param array $data API-Rohdaten
+     * @return array|WP_Error
+     */
+    private function extract_facilities_array($data) {
+        if (!is_array($data)) {
+            return new WP_Error('invalid_format', 'API-Antwort hat kein gültiges Array-Format.');
+        }
+
+        if (isset($data[0]) && is_array($data[0])) {
+            return $data;
+        }
+
+        $candidate_keys = array('brk_facilities', 'facilities', 'data');
+        foreach ($candidate_keys as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                return $data[$key];
+            }
+        }
+
+        return new WP_Error('invalid_format', 'Konnte kein Facilities-Array in der API-Antwort finden.');
+    }
+
+    /**
+     * Facilities in internes Datenformat normalisieren.
+     *
+     * @param array $facilities
+     * @return array
+     */
+    private function normalize_facilities($facilities) {
+        if (!is_array($facilities)) {
+            return array();
+        }
+
+        $normalized = array();
+
+        foreach ($facilities as $facility) {
+            if (!is_array($facility)) {
+                continue;
+            }
+
+            $normalized[] = $this->normalize_single_facility($facility);
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Einzelne Facility auf internes Schluesselschema abbilden.
+     *
+     * @param array $facility
+     * @return array
+     */
+    private function normalize_single_facility($facility) {
+        return array(
+            'id' => strval($this->pick_first_non_empty($facility, array('id', 'facility_id'), '')),
+            'ebene' => $this->pick_first_non_empty($facility, array('ebene', 'level'), ''),
+            'name' => $this->pick_first_non_empty($facility, array('name', 'title'), ''),
+            'title' => $this->pick_first_non_empty($facility, array('title', 'name'), ''),
+            'anschrift' => array(
+                'strasse' => $this->pick_first_non_empty($facility, array('anschrift.strasse', 'address.street'), ''),
+                'plz' => $this->pick_first_non_empty($facility, array('anschrift.plz', 'address.zip'), ''),
+                'ort' => $this->pick_first_non_empty($facility, array('anschrift.ort', 'address.city'), '')
+            ),
+            'kontakt' => array(
+                'telefon' => $this->pick_first_non_empty($facility, array('kontakt.telefon', 'contact.phone'), ''),
+                'fax' => $this->pick_first_non_empty($facility, array('kontakt.fax', 'contact.fax'), ''),
+                'email' => $this->pick_first_non_empty($facility, array('kontakt.email', 'contact.email'), ''),
+                'internet' => $this->pick_first_non_empty($facility, array('kontakt.internet', 'contact.internet', 'contact.website'), '')
+            ),
+            'vorstand' => array(
+                'funktion' => $this->pick_first_non_empty($facility, array('vorstand.funktion', 'board.role'), ''),
+                'name' => $this->pick_first_non_empty($facility, array('vorstand.name', 'board.name'), '')
+            ),
+            'geschaeftsfuehrung' => array(
+                'funktion' => $this->pick_first_non_empty($facility, array('geschaeftsfuehrung.funktion', 'management.role'), ''),
+                'name' => $this->pick_first_non_empty($facility, array('geschaeftsfuehrung.name', 'management.name'), ''),
+                'email' => $this->pick_first_non_empty($facility, array('geschaeftsfuehrung.email', 'management.email'), ''),
+                'telefon' => $this->pick_first_non_empty($facility, array('geschaeftsfuehrung.telefon', 'management.phone'), '')
+            )
+        );
+    }
+
+    /**
+     * Erstes vorhandenes, nicht-leeres Feld aus einer Liste von Pfaden holen.
+     *
+     * @param array $source
+     * @param array $paths
+     * @param mixed $default
+     * @return mixed
+     */
+    private function pick_first_non_empty($source, $paths, $default = '') {
+        foreach ($paths as $path) {
+            $value = $this->get_nested_value($source, $path, null);
+            if ($value !== null && $value !== '') {
+                return $value;
+            }
+        }
+
+        return $default;
+    }
     
     /**
      * Cache manuell löschen
@@ -288,6 +408,11 @@ class BRK_Facilities_Loader {
             $data = json_decode($json_data, true);
             
             if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+                $extracted = $this->extract_facilities_array($data);
+                if (!is_wp_error($extracted)) {
+                    $data = $this->normalize_facilities($extracted);
+                }
+
                 // Cache setzen mit kürzerer Laufzeit (1 Stunde)
                 set_transient(self::CACHE_KEY, $data, 3600);
                 error_log('BRK Impressum: Fallback-Daten aus lokaler Datei geladen');
@@ -296,7 +421,7 @@ class BRK_Facilities_Loader {
         }
         
         // Hardcoded Fallback-Daten als letzter Ausweg
-        $fallback_data = $this->get_hardcoded_fallback_data();
+        $fallback_data = $this->normalize_facilities($this->get_hardcoded_fallback_data());
         set_transient(self::CACHE_KEY, $fallback_data, 3600);
         error_log('BRK Impressum: Hardcoded Fallback-Daten verwendet');
         return $fallback_data;
@@ -409,9 +534,16 @@ class BRK_Facilities_Loader {
             $data = json_decode($body, true);
             
             if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
-                $result['success'] = true;
-                $result['facilities_count'] = count($data);
-                $result['sample_ids'] = array_slice(array_column($data, 'id'), 0, 5);
+                $facilities = $this->extract_facilities_array($data);
+                if (is_wp_error($facilities)) {
+                    $result['json_error'] = $facilities->get_error_message();
+                    $result['body_preview'] = substr($body, 0, 200);
+                } else {
+                    $facilities = $this->normalize_facilities($facilities);
+                    $result['success'] = true;
+                    $result['facilities_count'] = count($facilities);
+                    $result['sample_ids'] = array_slice(array_column($facilities, 'id'), 0, 5);
+                }
             } else {
                 $result['json_error'] = json_last_error_msg();
                 $result['body_preview'] = substr($body, 0, 200);

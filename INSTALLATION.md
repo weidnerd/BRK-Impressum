@@ -28,7 +28,7 @@ cd /pfad/zu/wordpress/wp-content/plugins/
 ### Schritt 3: Plugin konfigurieren
 
 1. Gehen Sie zu **Einstellungen > BRK Impressum**
-2. Die Seite lädt automatisch die Verbände aus `https://mein.brk.de/data/facilities.json`
+2. Die Seite lädt automatisch die Verbände aus `https://api.brk.id/api/v1/assets/facility.json`
 
 ## Detaillierte Konfiguration
 
@@ -165,9 +165,9 @@ BRK_Facilities_Loader::get_instance()->clear_cache();
 
 **Lösungen:**
 1. Prüfen Sie die Internetverbindung des Servers
-2. Testen Sie die URL: https://mein.brk.de/data/facilities.json
+2. Testen Sie die URL: https://api.brk.id/api/v1/assets/facility.json
 3. Prüfen Sie Firewall-Einstellungen
-4. Prüfen Sie SSL-Zertifikate: `openssl s_client -connect mein.brk.de:443`
+4. Prüfen Sie SSL-Zertifikate: `openssl s_client -connect api.brk.id:443`
 
 **Temporäre Lösung:**
 ```bash

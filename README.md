@@ -6,7 +6,7 @@ WordPress Multisite (MU) Plugin für die automatische Generierung von Impressum-
 
 Dieses Plugin ermöglicht es WordPress Multisite-Unterseiten, automatisch ein vollständiges Impressum zu erstellen, basierend auf:
 
-- Daten aus der BRK Facilities API (`https://mein.brk.de/data/facilities.json`)
+- Daten aus der BRK Facilities API (`https://api.brk.id/api/v1/assets/facility.json`)
 - Individuellen Angaben zum Seiten-Verantwortlichen
 
 ## Features
@@ -78,37 +78,44 @@ Sie können das Impressum auch auf jeder beliebigen Seite mit dem Shortcode einb
 
 ## Datenstruktur
 
-Das Plugin erwartet folgende Struktur in der `facilities.json`:
+Die API liefert aktuell ein Array mit englischen Feldnamen. Das Plugin normalisiert diese intern auf das bisherige Schluesselschema.
 
 ```json
 [
   {
     "id": "000",
-    "ebene": "Landesverband",
-    "name": "BRK Landesverband Bayern",
-    "anschrift": {
-      "strasse": "Garmischer Straße 19-21",
-      "plz": "81373",
-      "ort": "München"
+    "name": "Landesgeschäftsstelle",
+    "title": "Bayerisches Rotes Kreuz Landesgeschäftsstelle",
+    "level": "Landesverband",
+    "address": {
+      "street": "Bauernfeindstraße 17",
+      "zip": "80939",
+      "city": "München"
     },
-    "kontakt": {
-      "telefon": "089 9241-0",
-      "fax": "089 9241-199",
+    "contact": {
+      "phone": "+49 89 9241-0",
       "email": "info@brk.de",
-      "internet": "https://brk.de"
     },
-    "vorstand": {
-      "funktion": "Präsident",
-      "name": "Max Mustermann"
+    "board": {
+      "name": "Hans-Michael Weisky",
+      "role": "Präsident"
     },
-    "geschaeftsfuehrung": {
-      "funktion": "Geschäftsführer",
-      "name": "Erika Musterfrau",
-      "email": "geschaeftsfuehrung@brk.de"
+    "management": {
+      "name": "Robert Augustin",
+      "role": "Landesgeschäftsführer",
+      "phone": "+49 89 9241-1327"
     }
   }
 ]
 ```
+
+Interne Zuordnung (beispielhaft):
+
+- `level` -> `ebene`
+- `address.street` -> `anschrift.strasse`
+- `contact.phone` -> `kontakt.telefon`
+- `board.role` -> `vorstand.funktion`
+- `management.role` -> `geschaeftsfuehrung.funktion`
 
 ## API-Endpunkte
 
@@ -160,7 +167,7 @@ Das Plugin aktualisiert **automatisch alle Impressum-Seiten**, wenn sich die Fac
 2. **Änderungserkennung**: Nur wenn sich die JSON-Inhalte wirklich geändert haben (Hash-Vergleich), werden die Impressum-Seiten im Netzwerk neu generiert
 3. **Nach manuellem Refresh**: Auch bei "Daten jetzt aktualisieren" gilt dieselbe Änderungserkennung
 
-Dies stellt sicher, dass alle Unterseiten immer die aktuellsten Daten aus `https://mein.brk.de/data/facilities.json` verwenden.
+Dies stellt sicher, dass alle Unterseiten immer die aktuellsten Daten aus `https://api.brk.id/api/v1/assets/facility.json` verwenden.
 
 ## Hooks & Filter
 
@@ -219,7 +226,7 @@ Das Plugin verwendet automatisch **Fallback-Daten**, wenn die API nicht erreichb
 
 **Für Produktivumgebungen:**
 
-1. Überprüfen Sie die Verbindung zu `https://mein.brk.de/data/facilities.json`
+1. Überprüfen Sie die Verbindung zu `https://api.brk.id/api/v1/assets/facility.json`
 2. Stellen Sie sicher, dass SSL-Zertifikate korrekt konfiguriert sind
 3. Prüfen Sie die PHP-Fehlerlog-Datei: `tail -f /pfad/zu/php-error.log`
 4. Versuchen Sie, den Cache zu aktualisieren

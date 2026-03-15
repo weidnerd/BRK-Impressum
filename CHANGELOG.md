@@ -122,6 +122,24 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 - Verhindert unnötige Re-Generierung aller Impressum-Seiten, wenn sich die JSON-Inhalte nicht geändert haben
 
+## [1.2.4] - 2026-03-15
+
+### Geändert (1.2.4)
+
+- BRK Facilities API-Endpoint auf `https://api.brk.id/api/v1/assets/facility.json` umgestellt
+- Loader erweitert, um neue API-Strukturen kompatibel zu verarbeiten:
+  - direktes Array
+  - Objekt mit `data`
+  - Objekt mit `facilities`
+  - Objekt mit `brk_facilities`
+- Feldmapping für neues API-Schema ergänzt (u. a. `level/address/contact/board/management`)
+- Daten werden intern auf das bestehende Format normalisiert (`ebene/anschrift/kontakt/vorstand/geschaeftsfuehrung`), sodass Generator und Admin kompatibel bleiben
+- API-Verbindungstest auf die neuen Antwortformate angepasst
+
+### Dokumentation (1.2.4)
+
+- Doku auf neuen Endpoint aktualisiert (`README.md`, `INSTALLATION.md`, `QUICKSTART.md`, `DEBUGGING.md`)
+
 ## [Unveröffentlicht]
 
 ### Geplant

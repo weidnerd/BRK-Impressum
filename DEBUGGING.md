@@ -63,9 +63,9 @@ Die API funktioniert korrekt!
 ❌ Verbindung fehlgeschlagen
 
 Details:
-URL: https://mein.brk.de/data/facilities.json
+URL: https://api.brk.id/api/v1/assets/facility.json
 
-Fehler: cURL error 6: Could not resolve host: mein.brk.de
+Fehler: cURL error 6: Could not resolve host: api.brk.id
 Code: http_request_failed
 
 Antwortzeit: 0.12 ms
@@ -107,7 +107,7 @@ Wenn ein Fehler vorliegt, sehen Sie eine **gelbe Warnbox**:
 ```
 ⚠️ Hinweis: Fallback-Daten werden verwendet, da die Live-API nicht erreichbar ist.
 
-API-URL: https://mein.brk.de/data/facilities.json
+API-URL: https://api.brk.id/api/v1/assets/facility.json
 
 🔍 Fehlerdetails anzeigen ▼
 ```
@@ -135,10 +135,10 @@ Sie sehen Einträge wie:
 ```
 [21-Jan-2026 12:34:56 UTC] BRK Impressum API Error: Array
 (
-    [url] => https://mein.brk.de/data/facilities.json
+    [url] => https://api.brk.id/api/v1/assets/facility.json
     [timestamp] => 2026-01-21 13:34:56
     [error_type] => WP_Error
-    [error_message] => cURL error 6: Could not resolve host: mein.brk.de
+    [error_message] => cURL error 6: Could not resolve host: api.brk.id
     [error_code] => http_request_failed
 )
 ```
@@ -161,10 +161,10 @@ Fehlermeldung: cURL error 6: Could not resolve host
 **Lösung:**
 ```bash
 # DNS testen
-ping mein.brk.de
+ping api.brk.id
 
 # cURL direkt testen
-curl -v https://mein.brk.de/data/facilities.json
+curl -v https://api.brk.id/api/v1/assets/facility.json
 
 # In wp-config.php Proxy konfigurieren (falls nötig)
 define('WP_PROXY_HOST', 'proxy.example.com');
@@ -190,7 +190,7 @@ HTTP Status: 404 - Not Found
 # Sollte JSON zurückgeben
 
 # Oder mit wget/curl:
-wget -O - https://mein.brk.de/data/facilities.json
+wget -O - https://api.brk.id/api/v1/assets/facility.json
 ```
 
 **Falls URL stimmt aber 403/401:**
@@ -222,10 +222,10 @@ Antwort-Vorschau: <!DOCTYPE html>...
 **Lösung:**
 ```bash
 # Antwort prüfen
-curl -s https://mein.brk.de/data/facilities.json | head -c 500
+curl -s https://api.brk.id/api/v1/assets/facility.json | head -c 500
 
 # JSON validieren
-curl -s https://mein.brk.de/data/facilities.json | python -m json.tool
+curl -s https://api.brk.id/api/v1/assets/facility.json | python -m json.tool
 ```
 
 ### 4. **Format_Error** - Daten haben falsches Format
@@ -238,32 +238,33 @@ data_type: string
 ```
 
 **Ursachen:**
-- JSON ist valid, aber kein Array
-- Falsches Datenformat
+- JSON ist valide, enthält aber weder ein direktes Array noch die erwarteten Keys
+- Falsches oder unerwartetes Datenformat
 
 **Lösung:**
 - Prüfen Sie die JSON-Struktur
-- Sollte ein Array sein: `[{...}, {...}]`
-- Nicht ein Objekt: `{data: [{...}]}`
+- Unterstützte Formate sind:
+    - Direktes Array: `[{...}, {...}]`
+    - Objekt mit Key `data`, `facilities` oder `brk_facilities`
 
 ## 🛠️ Manuelle API-Tests
 
 ### 1. Browser-Test
 ```
-https://mein.brk.de/data/facilities.json
+https://api.brk.id/api/v1/assets/facility.json
 ```
 **Erwartung:** Download einer JSON-Datei oder Anzeige im Browser
 
 ### 2. cURL-Test
 ```bash
-curl -v https://mein.brk.de/data/facilities.json
+curl -v https://api.brk.id/api/v1/assets/facility.json
 ```
 **Erwartung:** Status 200, JSON-Daten
 
 ### 3. WordPress-Test (WP-CLI)
 ```bash
 wp eval '
-$response = wp_remote_get("https://mein.brk.de/data/facilities.json");
+$response = wp_remote_get("https://api.brk.id/api/v1/assets/facility.json");
 if (is_wp_error($response)) {
     echo "Fehler: " . $response->get_error_message() . "\n";
 } else {
